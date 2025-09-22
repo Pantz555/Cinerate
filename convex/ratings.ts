@@ -106,6 +106,8 @@ export const submitRating = mutation({
     // Update movie's average rating
     await updateMovieRating(ctx, args.movieId);
 
+    await updateUserRatingAchievements(ctx, user._id);
+
     return { success: true, ratingId };
   },
 });
@@ -192,3 +194,66 @@ export const getRatingDistribution = query({
     return { distribution, totalRatings };
   },
 });
+
+async function updateUserRatingAchievements(ctx: any, userId: string) {
+  // Get user’s ratings
+  const ratings = await ctx.db
+    .query("ratings")
+    .withIndex("by_user", (q: any) => q.eq("userId", userId))
+    .collect();
+
+  const ratingCount = ratings.length;
+  const lowRatings = ratings.filter((r: any) => r.overallRating <= 2).length;
+  const highRatings = ratings.filter((r: any) => r.overallRating === 5).length;
+
+  // Collect genre diversity
+  const movieIds = ratings.map((r: any) => r.movieId);
+  const movies = await Promise.all(movieIds.map((id: any) => ctx.db.get(id)));
+  const uniqueGenres = new Set(
+    movies.flatMap((m) => (m?.genres ? m.genres : [])),
+  );
+
+  // Get rating-related achievements from DB
+  const achievements = await ctx.db
+    .query("achievements")
+    .withIndex("by_category", (q: any) => q.eq("category", "ratings"))
+    .collect();
+
+  for (const achievement of achievements) {
+    const { type, value } = achievement.requirement;
+
+    let achieved = false;
+    switch (type) {
+      case "total_ratings":
+        achieved = ratingCount >= value;
+        break;
+      case "low_ratings":
+        achieved = lowRatings >= value;
+        break;
+      case "high_ratings":
+        achieved = highRatings >= value;
+        break;
+      case "genre_diversity":
+        achieved = uniqueGenres.size >= value;
+        break;
+    }
+
+    if (achieved) {
+      const alreadyEarned = await ctx.db
+        .query("userAchievements")
+        .withIndex("by_user_achievement", (q: any) =>
+          q.eq("userId", userId).eq("achievementId", achievement._id),
+        )
+        .first();
+
+      if (!alreadyEarned) {
+        await ctx.db.insert("userAchievements", {
+          userId,
+          achievementId: achievement._id,
+          earnedAt: Date.now(),
+          progress: 100,
+        });
+      }
+    }
+  }
+}

@@ -320,7 +320,7 @@ export default function MovieRatingPage({
                   Write Your Review
                 </label>
                 <p className="text-sm text-gray-400">
-                  Share your thoughts about the movie (optional)
+                  Share your thoughts about the movie
                 </p>
                 <Textarea
                   id="review"

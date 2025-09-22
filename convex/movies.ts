@@ -20,6 +20,7 @@ export const createMovie = mutation({
     ),
     rating: v.number(),
     featured: v.optional(v.boolean()),
+    trending: v.optional(v.boolean()),
     posterUrl: v.optional(v.string()),
     posterFileId: v.id("_storage"), // reference to Convex storage
   },
@@ -44,6 +45,7 @@ export const createMovie = mutation({
           rating: args.rating,
           posterUrl: posterUrl ? posterUrl : undefined,
           featured: args.featured,
+          trending: args.trending,
           views: 0,
           reviews: 0,
           updatedAt: Date.now(),
@@ -101,6 +103,7 @@ export const updateMovie = mutation({
     ),
     rating: v.optional(v.number()),
     featured: v.optional(v.boolean()),
+    trending: v.optional(v.boolean()),
     posterUrl: v.optional(v.string()),
     posterFileId: v.optional(v.id("_storage")),
   },
@@ -124,7 +127,6 @@ export const updateMovie = mutation({
       if (posterFileId) {
         posterUrl = await ctx.storage.getUrl(posterFileId);
       }
-      console.log("args", args);
 
       // Remove undefined values and add timestamp
       const cleanedData = Object.fromEntries(
@@ -557,6 +559,290 @@ export const getUserRecentlyRatedMovies = query({
     return movies
       .filter((movie): movie is NonNullable<typeof movie> => movie !== null)
       .sort((a, b) => (b.ratedAt || 0) - (a.ratedAt || 0));
+  },
+});
+
+// Get personalized movie recommendations based on user's rating history
+export const getPersonalizedPicks = query({
+  args: {
+    limit: v.optional(v.number()),
+    minRating: v.optional(v.number()), // Minimum rating threshold for "liked" movies
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return [];
+    }
+
+    const limit = args.limit || 10;
+    const minRating = args.minRating || 4; // Consider movies rated 4+ as "liked"
+
+    // Get user's highly rated movies
+    const userRatings = await ctx.db
+      .query("ratings")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.gte(q.field("overallRating"), minRating))
+      .collect();
+
+    if (userRatings.length === 0) {
+      // If user hasn't rated any movies highly, return trending movies
+      return await ctx.db
+        .query("movies")
+        .filter((q) => q.eq(q.field("status"), "published"))
+        .order("desc")
+        .take(limit);
+    }
+
+    // Get the movies user rated highly
+    const likedMovies = await Promise.all(
+      userRatings.map((rating) => ctx.db.get(rating.movieId)),
+    );
+
+    const validLikedMovies = likedMovies.filter((movie) => movie !== null);
+
+    // Extract user preferences from liked movies
+    const preferredGenres = new Map<string, number>();
+    const preferredDirectors = new Map<string, number>();
+    const preferredYears = new Map<string, number>();
+
+    validLikedMovies.forEach((movie) => {
+      // Count genre preferences
+      if (movie.genre) {
+        preferredGenres.set(
+          movie.genre,
+          (preferredGenres.get(movie.genre) || 0) + 1,
+        );
+      }
+
+      // Count director preferences
+      if (movie.director) {
+        preferredDirectors.set(
+          movie.director,
+          (preferredDirectors.get(movie.director) || 0) + 1,
+        );
+      }
+
+      // Count year/decade preferences
+      if (movie.year) {
+        preferredYears.set(
+          movie.year,
+          (preferredYears.get(movie.year) || 0) + 1,
+        );
+      }
+    });
+
+    // Get movies user hasn't rated yet
+    const ratedMovieIds = new Set(userRatings.map((r) => r.movieId));
+
+    const allMovies = await ctx.db
+      .query("movies")
+      .filter((q) => q.eq(q.field("status"), "published"))
+      .collect();
+
+    const unratedMovies = allMovies.filter(
+      (movie) => !ratedMovieIds.has(movie._id),
+    );
+
+    // Score movies based on user preferences
+    const scoredMovies = unratedMovies.map((movie) => {
+      let score = 0;
+      let matchReasons = [];
+
+      // Genre similarity
+      if (movie.genre && preferredGenres.has(movie.genre)) {
+        const genreWeight =
+          preferredGenres.get(movie.genre)! / validLikedMovies.length;
+        score += genreWeight * 40; // 40% weight for genre
+        matchReasons.push(`Popular in ${movie.genre}`);
+      }
+
+      // Director similarity
+      if (movie.director && preferredDirectors.has(movie.director)) {
+        const directorWeight =
+          preferredDirectors.get(movie.director)! / validLikedMovies.length;
+        score += directorWeight * 30; // 30% weight for director
+        matchReasons.push(`Director: ${movie.director}`);
+      }
+
+      // Year similarity (prefer movies within similar time periods)
+      if (movie.year && preferredYears.has(movie.year)) {
+        const yearWeight =
+          preferredYears.get(movie.year)! / validLikedMovies.length;
+        score += yearWeight * 20; // 20% weight for year
+        matchReasons.push(`From ${movie.year}`);
+      }
+
+      // Boost high-rated movies
+      if (movie.avgRating) {
+        score += (movie.avgRating / 5) * 10; // 10% weight for general rating
+      }
+
+      return {
+        ...movie,
+        personalizedScore: score,
+        matchReasons:
+          matchReasons.length > 0 ? matchReasons : ["Similar to your taste"],
+        matchPercentage: Math.min(Math.round(score * 2), 99), // Convert to percentage, cap at 99%
+      };
+    });
+
+    // Sort by score and return top recommendations
+    return scoredMovies
+      .sort((a, b) => b.personalizedScore - a.personalizedScore)
+      .slice(0, limit);
+  },
+});
+
+// Get user's rating patterns for better recommendations
+export const getUserPreferences = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+
+    const userRatings = await ctx.db
+      .query("ratings")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    if (userRatings.length === 0) {
+      return null;
+    }
+
+    // Get rated movies
+    const ratedMovies = await Promise.all(
+      userRatings.map(async (rating) => {
+        const movie = await ctx.db.get(rating.movieId);
+        return movie ? { ...movie, userRating: rating.overallRating } : null;
+      }),
+    );
+
+    const validRatedMovies = ratedMovies.filter((movie) => movie !== null);
+
+    // Analyze preferences
+    const genrePreferences = new Map<
+      string,
+      { count: number; avgRating: number }
+    >();
+    const directorPreferences = new Map<
+      string,
+      { count: number; avgRating: number }
+    >();
+
+    validRatedMovies.forEach((movie) => {
+      if (movie.genre) {
+        const current = genrePreferences.get(movie.genre) || {
+          count: 0,
+          avgRating: 0,
+        };
+        genrePreferences.set(movie.genre, {
+          count: current.count + 1,
+          avgRating:
+            (current.avgRating * current.count + movie.userRating) /
+            (current.count + 1),
+        });
+      }
+
+      if (movie.director) {
+        const current = directorPreferences.get(movie.director) || {
+          count: 0,
+          avgRating: 0,
+        };
+        directorPreferences.set(movie.director, {
+          count: current.count + 1,
+          avgRating:
+            (current.avgRating * current.count + movie.userRating) /
+            (current.count + 1),
+        });
+      }
+    });
+
+    return {
+      totalRatings: userRatings.length,
+      averageRating:
+        userRatings.reduce((sum, r) => sum + r.overallRating, 0) /
+        userRatings.length,
+      favoriteGenres: Array.from(genrePreferences.entries())
+        .sort((a, b) => b[1].avgRating - a[1].avgRating)
+        .slice(0, 3)
+        .map(([genre, data]) => ({ genre, ...data })),
+      favoriteDirectors: Array.from(directorPreferences.entries())
+        .sort((a, b) => b[1].avgRating - a[1].avgRating)
+        .slice(0, 3)
+        .map(([director, data]) => ({ director, ...data })),
+    };
+  },
+});
+
+// Get movies similar to a specific movie the user liked
+export const getSimilarMovies = query({
+  args: {
+    movieId: v.id("movies"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 5;
+
+    const targetMovie = await ctx.db.get(args.movieId);
+    if (!targetMovie) {
+      return [];
+    }
+
+    // Find movies with similar attributes
+    const allMovies = await ctx.db
+      .query("movies")
+      .filter((q) => q.eq(q.field("status"), "published"))
+      .collect();
+
+    const similarMovies = allMovies
+      .filter((movie) => movie._id !== args.movieId)
+      .map((movie) => {
+        let similarityScore = 0;
+        let reasons = [];
+
+        // Same genre
+        if (movie.genre === targetMovie.genre) {
+          similarityScore += 40;
+          reasons.push(`Same genre: ${movie.genre}`);
+        }
+
+        // Same director
+        if (movie.director === targetMovie.director) {
+          similarityScore += 30;
+          reasons.push(`Same director: ${movie.director}`);
+        }
+
+        // Similar year (within 5 years)
+        const yearDiff = Math.abs(
+          parseInt(movie.year) - parseInt(targetMovie.year),
+        );
+        if (yearDiff <= 5) {
+          similarityScore += Math.max(0, 20 - yearDiff * 2);
+          reasons.push(`Similar era`);
+        }
+
+        // Similar rating
+        if (movie.avgRating && targetMovie.avgRating) {
+          const ratingDiff = Math.abs(movie.avgRating - targetMovie.avgRating);
+          if (ratingDiff <= 1) {
+            similarityScore += Math.max(0, 10 - ratingDiff * 5);
+            reasons.push(`Similar rating`);
+          }
+        }
+
+        return {
+          ...movie,
+          similarityScore,
+          similarityReasons: reasons,
+        };
+      })
+      .filter((movie) => movie.similarityScore > 20) // Only show reasonably similar movies
+      .sort((a, b) => b.similarityScore - a.similarityScore)
+      .slice(0, limit);
+
+    return similarMovies;
   },
 });
 

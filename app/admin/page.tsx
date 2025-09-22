@@ -59,7 +59,6 @@ import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { useQueryWithStatus } from "@/components/ConvexClientProvider";
 import { MovieCardSkeleton } from "@/components/skeleton/movie-card-skeleton";
-import { useQuery } from "convex-helpers/react";
 import { Id } from "@/convex/_generated/dataModel";
 import Image from "next/image";
 import RecentActivityCard from "@/components/activity-card";
@@ -84,8 +83,6 @@ export default function AdminPage() {
   const { data: user } = useQueryWithStatus(api.auth.loggedInUser);
   const router = useRouter();
 
-  console.log("loggedin user", user?.role);
-
   // Form state for adding/editing movies
   const [movieForm, setMovieForm] = useState({
     title: "",
@@ -99,6 +96,7 @@ export default function AdminPage() {
     duration: "",
     rating: "",
     featured: false,
+    trending: false,
     status: "published", // published, draft, archived
   });
 
@@ -216,6 +214,7 @@ export default function AdminPage() {
         status: movieForm.status as "published" | "draft" | "archived",
         rating: 0,
         featured: movieForm.featured,
+        trending: movieForm.trending,
         posterUrl: storageId ? undefined : movieForm.poster,
         posterFileId: storageId,
       });
@@ -247,6 +246,7 @@ export default function AdminPage() {
       rating: movie.rating?.toString() || "0",
       status: movie.status,
       featured: movie.featured,
+      trending: movie.trending,
     });
     setPosterPreview(movie.posterUrl || "");
     setIsMovieEditOpen(false);
@@ -294,6 +294,7 @@ export default function AdminPage() {
         trailer: movieForm.trailer,
         duration: movieForm.duration,
         featured: movieForm.featured,
+        trending: movieForm.trending,
         status: movieForm.status as "published" | "draft" | "archived",
         rating: parseFloat(movieForm.rating) || 0,
       };
@@ -615,6 +616,19 @@ export default function AdminPage() {
                         setMovieForm({
                           ...movieForm,
                           featured: v,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-gray-300">Trending</Label>
+                    <Switch
+                      checked={movieForm.trending}
+                      onCheckedChange={(v) =>
+                        setMovieForm({
+                          ...movieForm,
+                          trending: v,
                         })
                       }
                     />
@@ -1175,6 +1189,19 @@ export default function AdminPage() {
                                       }
                                     />
                                   </div>
+
+                                   <div>
+                    <Label className="text-gray-300">Trending</Label>
+                    <Switch
+                      checked={movieForm.trending}
+                      onCheckedChange={(v) =>
+                        setMovieForm({
+                          ...movieForm,
+                          trending: v,
+                        })
+                      }
+                    />
+                  </div>
                                 </div>
                                 <div className="flex justify-end gap-2">
                                   <Button

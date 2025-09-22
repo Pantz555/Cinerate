@@ -23,6 +23,7 @@ import {
   Filter,
   Film,
   Play,
+  Sparkles,
 } from "lucide-react";
 import { useQuery } from "convex-helpers/react";
 import { api } from "@/convex/_generated/api";
@@ -49,6 +50,15 @@ export default function DiscoverPage() {
     [],
   );
   const [isSearching, setIsSearching] = useState(false);
+
+  // Get personalized picks based on user ratings
+  const { data: personalizedPicks, isPending: personalizedLoading } = useQuery(
+    api.movies.getPersonalizedPicks,
+    { limit: 8 },
+  );
+
+  // Get user preferences for display
+  const { data: userPreferences } = useQuery(api.movies.getUserPreferences, {});
 
   useEffect(() => {
     const fetch = async () => {
@@ -125,37 +135,6 @@ export default function DiscoverPage() {
   const { data: hiddenGems, isPending: hiddenGenLoading } = useQuery(
     api.movies.getHiddenGems,
   );
-
-  const personalizedPicks = [
-    {
-      id: "everything-everywhere",
-      title: "Everything Everywhere All at Once",
-      poster: "/placeholder.svg?height=450&width=300",
-      rating: 4.8,
-      match: 95,
-    },
-    {
-      id: "the-batman",
-      title: "The Batman",
-      poster: "/placeholder.svg?height=450&width=300",
-      rating: 4.5,
-      match: 89,
-    },
-    {
-      id: "licorice-pizza",
-      title: "Licorice Pizza",
-      poster: "/placeholder.svg?height=450&width=300",
-      rating: 4.3,
-      match: 87,
-    },
-    {
-      id: "drive-my-car",
-      title: "Drive My Car",
-      poster: "/placeholder.svg?height=450&width=300",
-      rating: 4.6,
-      match: 92,
-    },
-  ];
 
   const handleRandomMovie = () => {
     if (currentMovies && currentMovies.length > 0) {
@@ -609,7 +588,7 @@ export default function DiscoverPage() {
                             <div className="flex items-center gap-1 mt-1">
                               <Star className="h-4 w-4 text-yellow-500 fill-current" />
                               <span className="text-gray-300 text-sm">
-                                {movie.avgRating || 0}
+                                {movie.avgRating || "N/A"}
                               </span>
                             </div>
                           </div>
@@ -659,7 +638,7 @@ export default function DiscoverPage() {
                             <div className="flex items-center gap-1 mt-1">
                               <Star className="h-4 w-4 text-yellow-500 fill-current" />
                               <span className="text-gray-300 text-sm">
-                                {movie.avgRating || 0}
+                                {movie.avgRating || "N/A"}
                               </span>
                             </div>
                           </div>
@@ -702,7 +681,7 @@ export default function DiscoverPage() {
                           <div className="flex items-center gap-1 mt-1">
                             <Star className="h-4 w-4 text-yellow-500 fill-current" />
                             <span className="text-gray-300 text-sm">
-                              {movie.avgRating || 0}
+                              {movie.avgRating || "N/A"}
                             </span>
                           </div>
                         </div>
@@ -749,7 +728,7 @@ export default function DiscoverPage() {
                             <div className="flex items-center gap-1">
                               <Star className="h-4 w-4 text-yellow-500 fill-current" />
                               <span className="text-gray-300 text-sm">
-                                {movie.avgRating || 0}
+                                {movie.avgRating || "N/A"}
                               </span>
                             </div>
                             <span className="text-gray-500 text-xs">
@@ -775,37 +754,83 @@ export default function DiscoverPage() {
                   </h2>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
-                  {personalizedPicks.map((movie) => (
-                    <Link
-                      key={movie.id}
-                      href={`/movie/${movie.id}`}
-                      className="group"
-                    >
-                      <div className="relative">
-                        <div className="aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
-                          <img
-                            src={movie.poster || "/placeholder.svg"}
-                            alt={movie.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                        <div className="absolute top-2 left-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                          {movie.match}% MATCH
-                        </div>
-                        <div className="mt-3">
-                          <h3 className="text-white font-medium text-sm truncate">
-                            {movie.title}
-                          </h3>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                            <span className="text-gray-300 text-sm">
-                              {movie?.rating || 0}
-                            </span>
+                  {personalizedPicks && personalizedPicks.length > 0 ? (
+                    personalizedPicks?.map((movie) => (
+                      <div key={movie._id} className="group">
+                        <div className="bg-[#1d2027] rounded-lg overflow-hidden hover:bg-[#252932] transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10">
+                          <Link href={`/movie/${movie._id}`}>
+                            <div
+                              className="w-full bg-center bg-no-repeat aspect-[2/3] bg-cover transform group-hover:scale-105 transition-transform duration-300 relative"
+                              style={{
+                                backgroundImage: `url("${movie.posterUrl || "/placeholder.jpg"}")`,
+                              }}
+                            >
+                              {/* Match percentage badge */}
+                              <div className="absolute top-2 left-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                                {movie?.matchPercentage || 95}% MATCH
+                              </div>
+                              {/* Sparkles icon for personalized */}
+                              <div className="absolute top-2 right-2 text-yellow-400">
+                                <Sparkles className="h-4 w-4" />
+                              </div>
+                            </div>
+                          </Link>
+                          <div className="p-3">
+                            <Link href={`/movie/${movie._id}`}>
+                              <h3 className="text-white text-sm font-medium truncate hover:text-purple-400 transition-colors">
+                                {movie.title}
+                              </h3>
+                            </Link>
+                            <div className="flex items-center justify-between mt-2">
+                              <div className="flex items-center gap-1">
+                                <Star className="h-3 w-3 text-amber-400 fill-current" />
+                                <span className="text-gray-300 text-xs font-medium">
+                                  {movie.avgRating?.toFixed(1) || "N/A"}
+                                </span>
+                              </div>
+                              <span className="text-gray-500 text-xs">
+                                {movie.year}
+                              </span>
+                            </div>
+                            {/* Match reasons */}
+                            <div className="mt-2">
+                              <p className="text-gray-400 text-xs truncate">
+                                {movie?.matchReasons?.[0] ||
+                                  "Based on your preferences"}
+                              </p>
+                            </div>
+                            <div className="flex gap-1 mt-3">
+                              <Button
+                                size="sm"
+                                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-xs h-7"
+                                asChild
+                              >
+                                <Link href={`/movie/${movie._id}/rate`}>
+                                  <Star className="h-3 w-3 mr-1" />
+                                  Rate
+                                </Link>
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white text-xs h-7 bg-transparent"
+                                asChild
+                              >
+                                <Link href={`/movie/${movie._id}`}>
+                                  <Play className="h-3 w-3 mr-1" />
+                                  View
+                                </Link>
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </Link>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-gray-400">
+                      No personalized picks for now.
+                    </p>
+                  )}
                 </div>
               </section>
             </>

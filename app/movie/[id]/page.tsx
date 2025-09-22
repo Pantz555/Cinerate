@@ -5,7 +5,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/header";
-import { Star, StarHalf, BookmarkPlus, ThumbsUp } from "lucide-react";
+import {
+  Star,
+  StarHalf,
+  BookmarkPlus,
+  ThumbsUp,
+  ThumbsDown,
+} from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
@@ -14,6 +20,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex-helpers/react";
 import MovieDetailsSkeleton from "@/components/skeleton/movie-detatils-skeleton";
+import { useAuthActions } from "@convex-dev/auth/react";
+import MovieComments from "@/components/MovieComments";
 
 export default function MovieDetailsPage({
   params,
@@ -35,6 +43,10 @@ export default function MovieDetailsPage({
     movieId: id as Id<"movies">,
   });
 
+  // Get current user
+  const { data: user } = useQuery(api.auth.loggedInUser);
+  const currentUserId = user?._id;
+
   const { data: communityReviews } = useQuery(
     api.communityReviews.getCommunityReviews,
     {
@@ -50,7 +62,7 @@ export default function MovieDetailsPage({
   const { data: ratingDistribution } = useQuery(
     api.ratings.getRatingDistribution,
     {
-      movieId: params.id as Id<"movies">,
+      movieId: id as Id<"movies">,
     },
   );
 
@@ -149,7 +161,7 @@ export default function MovieDetailsPage({
   };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-[#111317]">
+    <div className="relative flex min-h-screen w-full flex-col bg-[#111317] transition-all duration-500 mb-10">
       <Header />
 
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -167,7 +179,7 @@ export default function MovieDetailsPage({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 transition-all duration-500">
             <div className="sticky top-28">
               <div className="aspect-[2/3] w-full bg-center bg-no-repeat bg-cover rounded-lg shadow-2xl shadow-black/30 overflow-hidden">
                 <Image
@@ -275,14 +287,20 @@ export default function MovieDetailsPage({
                       >
                         <div className="flex items-center gap-3">
                           <div
-                            className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+                            className="size-8 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
                             style={{
-                              backgroundImage: `url(${
-                                review?.user?.image ||
-                                "https://lh3.googleusercontent.com/aida-public/AB6AXuCy6UwcqaUrDvlTwlgA1mUex0HCVXzwY-g6kvn6l9KE9oPsWP_PLWpXDE5nBIZfmvq6CzS3Bi3t6JQGTjNuDjXb6lqohJiP3TsAYjTpik7suRJJ6uerm-eMw84QUWSkEaD4jDU_blERy4ZCDIHTX5E6lifAWSoD8nJKcr0jxyNFXOTVBFgP4_oUmX_wWLj2t2M8MhX0YMc87TriC6f5-2OtSBKEQ7Hiecyxy-CA6wfUZEX5kg70Awjb9YmCqWJ1qO3D6Sb4kMekzkc"
-                              })`,
+                              backgroundImage: review.user.image
+                                ? `url("${review.user.image}")`
+                                : undefined,
                             }}
-                          ></div>
+                          >
+                            {!review.user.image && (
+                              <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+                                {review.user.name?.charAt(0)?.toUpperCase() ||
+                                  "A"}
+                              </div>
+                            )}
+                          </div>
                           <div>
                             <p className="text-white font-semibold">
                               {review.user.name || "Anonymous"}
@@ -332,16 +350,32 @@ export default function MovieDetailsPage({
                   <p className="text-white/70 text-sm">No reviews yet.</p>
                 )}
 
-                {!isDone && (
-                  <button
-                    className="text-[var(--primary-color)] font-semibold text-sm hover:underline"
-                    onClick={loadMore}
-                  >
-                    Show more
-                  </button>
-                )}
+                <div className="flex justify-center gap-4 mt-8">
+                  {paginationOpts.cursor && (
+                    <button
+                      onClick={loadPrevious}
+                      className="text-[var(--primary-color)] font-semibold text-sm hover:underline"
+                    >
+                      Previous
+                    </button>
+                  )}
+                  {!isDone && (
+                    <button
+                      className="text-[var(--primary-color)] font-semibold text-sm hover:underline"
+                      onClick={loadMore}
+                    >
+                      Show More
+                    </button>
+                  )}
+                </div>
               </div>
             </section>
+
+            <MovieComments
+              movieId={id as Id<"movies">}
+              user={user as any}
+              currentUserId={currentUserId as Id<"users"> | undefined}
+            />
           </div>
         </div>
       </main>

@@ -8,12 +8,16 @@
  * @module
  */
 
+import type * as achievements from "../achievements.js";
 import type * as activities from "../activities.js";
 import type * as auth from "../auth.js";
 import type * as communityReviews from "../communityReviews.js";
+import type * as crons from "../crons.js";
 import type * as http from "../http.js";
+import type * as movieComments from "../movieComments.js";
 import type * as movies from "../movies.js";
 import type * as myFunctions from "../myFunctions.js";
+import type * as profile from "../profile.js";
 import type * as rag from "../rag.js";
 import type * as ratings from "../ratings.js";
 
@@ -32,12 +36,16 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  achievements: typeof achievements;
   activities: typeof activities;
   auth: typeof auth;
   communityReviews: typeof communityReviews;
+  crons: typeof crons;
   http: typeof http;
+  movieComments: typeof movieComments;
   movies: typeof movies;
   myFunctions: typeof myFunctions;
+  profile: typeof profile;
   rag: typeof rag;
   ratings: typeof ratings;
 }>;

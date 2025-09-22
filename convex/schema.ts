@@ -2,14 +2,72 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
-// The schema is normally optional, but Convex Auth
-// requires indexes defined on `authTables`.
-// The schema provides more precise TypeScript types.
 export default defineSchema({
   ...authTables,
   numbers: defineTable({
     value: v.number(),
   }),
+
+  // User achievements
+  achievements: defineTable({
+    title: v.string(),
+    description: v.string(),
+    icon: v.string(), // URL to achievement icon
+    category: v.union(
+      v.literal("ratings"),
+      v.literal("activity"),
+      v.literal("social"),
+      v.literal("exploration"),
+      v.literal("milestone"),
+    ),
+    requirement: v.object({
+      type: v.union(
+        v.literal("total_ratings"),
+        v.literal("consecutive_days"),
+        v.literal("genre_diversity"),
+        v.literal("high_ratings"),
+        v.literal("low_ratings"),
+        v.literal("early_adopter"),
+        v.literal("reviews_written"),
+        v.literal("lists_created"),
+        v.literal("movies_discovered"),
+      ),
+      value: v.number(),
+      timeframe: v.optional(v.string()), // e.g., "7_days", "30_days"
+    }),
+    rarity: v.union(
+      v.literal("common"),
+      v.literal("uncommon"),
+      v.literal("rare"),
+      v.literal("epic"),
+      v.literal("legendary"),
+    ),
+    points: v.number(), // achievement points
+    isActive: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_category", ["category"])
+    .index("by_rarity", ["rarity"])
+    .index("by_active", ["isActive"]),
+
+  // User earned achievements
+  userAchievements: defineTable({
+    userId: v.id("users"),
+    achievementId: v.id("achievements"),
+    earnedAt: v.number(),
+    progress: v.optional(v.number()), // for tracking partial progress
+    metadata: v.optional(
+      v.object({
+        triggerValue: v.optional(v.number()),
+        additionalInfo: v.optional(v.string()),
+      }),
+    ),
+  })
+    .index("by_user", ["userId"])
+    .index("by_achievement", ["achievementId"])
+    .index("by_user_earned", ["userId", "earnedAt"])
+    .index("by_user_achievement", ["userId", "achievementId"]),
+
   // Core movie data
   movies: defineTable({
     title: v.string(),
@@ -72,6 +130,12 @@ export default defineSchema({
       }),
     ),
     lastActive: v.optional(v.number()),
+
+    // New stats fields
+    totalAchievementPoints: v.optional(v.number()),
+    currentStreak: v.optional(v.number()),
+    longestStreak: v.optional(v.number()),
+    lastRatingDate: v.optional(v.number()),
   }).index("email", ["email"]),
 
   // Multi-dimensional ratings
@@ -92,6 +156,7 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_movie", ["movieId"])
+    .index("by_user_date", ["userId", "createdAt"])
     .index("by_user_movie", ["userId", "movieId"]),
 
   // User movie lists
@@ -302,4 +367,39 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_user_unread", ["userId", "isRead"])
     .index("by_user_date", ["userId", "createdAt"]),
+
+  // Movie comments (separate from community reviews)
+  movieComments: defineTable({
+    userId: v.id("users"),
+    movieId: v.id("movies"),
+    content: v.string(),
+    likesCount: v.number(),
+    dislikesCount: v.number(),
+    repliesCount: v.optional(v.number()),
+    parentCommentId: v.optional(v.id("movieComments")), // for nested replies
+    isEdited: v.boolean(),
+    status: v.union(
+      v.literal("published"),
+      v.literal("flagged"),
+      v.literal("deleted"),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_movie", ["movieId"])
+    .index("by_user", ["userId"])
+    .index("by_movie_date", ["movieId", "createdAt"])
+    .index("by_parent", ["parentCommentId"])
+    .index("by_status", ["status"]),
+
+  // Likes/Dislikes on movie comments
+  movieCommentReactions: defineTable({
+    userId: v.id("users"),
+    commentId: v.id("movieComments"),
+    reactionType: v.union(v.literal("like"), v.literal("dislike")),
+    createdAt: v.number(),
+  })
+    .index("by_comment", ["commentId"])
+    .index("by_user", ["userId"])
+    .index("by_user_comment", ["userId", "commentId"]),
 });
