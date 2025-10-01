@@ -17,7 +17,6 @@ import { Progress } from "@/components/ui/progress";
 import {
   Brain,
   Target,
-  TrendingUp,
   Settings,
   Star,
   Heart,
@@ -26,89 +25,48 @@ import {
   Zap,
   Bell,
   Palette,
-  Grid,
   BarChart3,
+  Loader2,
+  RefreshCw,
+  ArrowLeft
 } from "lucide-react";
-
-// Mock user data for demonstration
-const mockUserPreferences = {
-  favoriteGenres: ["Action", "Sci-Fi", "Thriller"],
-  preferredRatingRange: [3.5, 5.0] as [number, number],
-  watchedMovies: ["inception", "dark-knight", "interstellar"],
-  ratedMovies: [
-    {
-      movieId: "inception",
-      rating: 5,
-      categories: {
-        acting: 5,
-        plot: 5,
-        cinematography: 5,
-        direction: 5,
-        entertainment: 5,
-      },
-    },
-    {
-      movieId: "dark-knight",
-      rating: 5,
-      categories: {
-        acting: 5,
-        plot: 4,
-        cinematography: 5,
-        direction: 5,
-        entertainment: 5,
-      },
-    },
-  ],
-  personalityProfile: {
-    adventurous: 0.7,
-    critical: 0.3,
-    social: 0.8,
-    binge: 0.6,
-  },
-};
-
-const mockRecommendations = [
-  {
-    movieId: "dune",
-    title: "Dune",
-    poster: "/placeholder.svg?height=300&width=200",
-    rating: 4.6,
-    confidence: 0.92,
-    reasons: ["Matches your Sci-Fi preferences", "From acclaimed director"],
-    matchScore: 92,
-    category: "similar" as const,
-  },
-  {
-    movieId: "blade-runner-2049",
-    title: "Blade Runner 2049",
-    poster: "/placeholder.svg?height=300&width=200",
-    rating: 4.5,
-    confidence: 0.89,
-    reasons: ["Similar to movies you loved", "Highly rated"],
-    matchScore: 89,
-    category: "collaborative" as const,
-  },
-  {
-    movieId: "everything-everywhere",
-    title: "Everything Everywhere All at Once",
-    poster: "/placeholder.svg?height=300&width=200",
-    rating: 4.8,
-    confidence: 0.85,
-    reasons: ["Trending now", "Matches your adventurous taste"],
-    matchScore: 85,
-    category: "trending" as const,
-  },
-];
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import Link from "next/link";
 
 export default function PersonalizationPage() {
-  const [preferences, setPreferences] = useState(mockUserPreferences);
-  const [recommendations, setRecommendations] = useState(mockRecommendations);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Fetch user recommendations
+  const recommendations = useQuery(api.recommendations.getUserRecommendations, {
+    limit: 20,
+  });
+
+  // Generate new recommendations
+  const generateRecs = useMutation(api.recommendations.generateRecommendations);
+
+  // Mock user data (you can fetch this from your user query)
+  const mockUser = {
+    favoriteGenres: ["Action", "Sci-Fi", "Thriller"],
+    preferredRatingRange: [3.5, 5.0] as [number, number],
+    personalityProfile: {
+      adventurous: 0.7,
+      critical: 0.3,
+      social: 0.8,
+      binge: 0.6,
+    },
+    stats: {
+      watchedMovies: 45,
+      ratedMovies: 32,
+      avgRating: 4.7,
+    },
+  };
+
+  const [preferences, setPreferences] = useState(mockUser);
   const [uiSettings, setUISettings] = useState({
-    theme: "dark",
     compactMode: false,
     showRatings: true,
     autoplay: false,
-    gridSize: "medium",
     notifications: {
       newReleases: true,
       recommendations: true,
@@ -144,6 +102,17 @@ export default function PersonalizationPage() {
     },
   ];
 
+  const handleRefreshRecommendations = async () => {
+    setIsRefreshing(true);
+    try {
+      await generateRecs({ limit: 20, refreshCache: true });
+    } catch (error) {
+      console.error("Failed to generate recommendations:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const updateRatingRange = (newRange: number[]) => {
     setPreferences((prev) => ({
       ...prev,
@@ -151,8 +120,43 @@ export default function PersonalizationPage() {
     }));
   };
 
+  const getAlgorithmColor = (algorithm: string) => {
+    switch (algorithm) {
+      case "content_based":
+        return "bg-blue-600";
+      case "collaborative":
+        return "bg-green-600";
+      case "trending":
+        return "bg-red-600";
+      case "discovery":
+        return "bg-purple-600";
+      default:
+        return "bg-gray-600";
+    }
+  };
+
+  const getAlgorithmLabel = (algorithm: string) => {
+    switch (algorithm) {
+      case "content_based":
+        return "Similar";
+      case "collaborative":
+        return "Community";
+      case "trending":
+        return "Trending";
+      case "discovery":
+        return "Discovery";
+      default:
+        return "Recommended";
+    }
+  };
   return (
     <div className="min-h-screen bg-black text-white p-4 pb-20">
+         <Button variant="ghost" className="text-gray-300 mb-6" asChild>
+            <Link href="/">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Home
+            </Link>
+          </Button>
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center mb-8">
@@ -167,7 +171,7 @@ export default function PersonalizationPage() {
         </div>
 
         <Tabs defaultValue="recommendations" className="space-y-6">
-          <TabsList className="bg-gray-900 border-gray-800 grid grid-cols-4 w-full max-w-2xl mx-auto">
+          <TabsList className="bg-gray-900 border-gray-800 grid grid-cols-1 md:grid-cols-4 w-full max-w-2xl mx-auto">
             <TabsTrigger
               value="recommendations"
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300"
@@ -202,107 +206,142 @@ export default function PersonalizationPage() {
           <TabsContent value="recommendations" className="space-y-6">
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-blue-500" />
-                  AI-Powered Recommendations
-                </CardTitle>
-                <CardDescription>
-                  Personalized movie suggestions based on your viewing history
-                  and preferences
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Brain className="w-5 h-5 text-blue-500" />
+                      AI-Powered Recommendations
+                    </CardTitle>
+                    <CardDescription>
+                      Personalized movie suggestions based on your viewing
+                      history and preferences
+                    </CardDescription>
+                  </div>
+                  <Button
+                    onClick={handleRefreshRecommendations}
+                    disabled={isRefreshing || !recommendations}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isRefreshing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Refresh
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {recommendations.map((rec) => (
-                    <div
-                      key={rec.movieId}
-                      className="bg-gray-800 rounded-lg p-4 space-y-3"
+                {!recommendations ? (
+                  <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                    <Brain className="w-16 h-16 text-gray-600" />
+                    <p className="text-gray-400">Loading recommendations...</p>
+                    <Button
+                      onClick={handleRefreshRecommendations}
+                      className="bg-blue-600 hover:bg-blue-700"
                     >
-                      <div className="aspect-[2/3] rounded-lg overflow-hidden bg-gray-700">
-                        <img
-                          src={rec.poster || "/placeholder.svg"}
-                          alt={rec.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-white truncate">
-                          {rec.title}
-                        </h3>
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                            <span className="text-sm text-gray-300">
-                              {rec.rating}
-                            </span>
+                      Generate Recommendations
+                    </Button>
+                  </div>
+                ) : recommendations.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                    <Target className="w-16 h-16 text-gray-600" />
+                    <p className="text-gray-400">
+                      No recommendations yet. Rate some movies to get started!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {recommendations.map((movie: any) => (
+                      <div
+                        key={movie._id}
+                        className="bg-gray-800 rounded-lg p-4 space-y-3"
+                      >
+                        <div className="aspect-[2/3] rounded-lg overflow-hidden bg-gray-700">
+                          {movie.posterUrl ? (
+                            <img
+                              src={movie.posterUrl}
+                              alt={movie.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <span className="text-gray-500">No Image</span>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white truncate">
+                            {movie.title}
+                          </h3>
+                          <div className="flex items-center justify-between mt-2">
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                              <span className="text-sm text-gray-300">
+                                {movie.avgRating?.toFixed(1) || "N/A"}
+                              </span>
+                            </div>
+                            <Badge
+                              variant="secondary"
+                              className={`text-xs ${getAlgorithmColor(
+                                movie.recommendationAlgorithm,
+                              )}`}
+                            >
+                              {Math.round(
+                                (movie.recommendationScore || 0) * 100,
+                              )}
+                              % Match
+                            </Badge>
                           </div>
-                          <Badge
-                            variant="secondary"
-                            className={`text-xs ${
-                              rec.category === "similar"
-                                ? "bg-blue-600"
-                                : rec.category === "trending"
-                                  ? "bg-red-600"
-                                  : rec.category === "collaborative"
-                                    ? "bg-green-600"
-                                    : "bg-purple-600"
-                            }`}
-                          >
-                            {rec.matchScore}% Match
-                          </Badge>
+                          <div className="mt-2">
+                            <Badge
+                              variant="outline"
+                              className="text-xs text-gray-300 border-gray-600"
+                            >
+                              {getAlgorithmLabel(movie.recommendationAlgorithm)}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-2">
+                            •{" "}
+                            {movie.recommendationReason ||
+                              "Recommended for you"}
+                          </p>
+                          {movie.genres && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {movie.genres.slice(0, 2).map((genre: string) => (
+                                <span
+                                  key={genre}
+                                  className="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded"
+                                >
+                                  {genre}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <Button className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white">
+                            <Link
+                              className="w-full flex items-center justify-center gap-2"
+                              href={`/movie/${movie._id}`}
+                            >
+                              <Star className="w-4 h-4 " />
+                              View Details
+                            </Link>
+                          </Button>
                         </div>
-                        <div className="mt-2 space-y-1">
-                          {rec.reasons.map((reason, index) => (
-                            <p key={index} className="text-xs text-gray-400">
-                              • {reason}
-                            </p>
-                          ))}
-                        </div>
-                        <Button className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white">
-                          <Star className="w-4 h-4 mr-2" />
-                          Rate Movie
-                        </Button>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Recommendation Categories */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="bg-gray-900 border-gray-800">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                      <Target className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white">Similar Movies</p>
-                      <p className="text-sm text-gray-400">
-                        Based on your ratings
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gray-900 border-gray-800">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white">Trending</p>
-                      <p className="text-sm text-gray-400">
-                        Popular with your taste
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               <Card className="bg-gray-900 border-gray-800">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -319,7 +358,7 @@ export default function PersonalizationPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gray-900 border-gray-800">
+              <Card className="bg-gray-800 border-gray-800">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
@@ -379,7 +418,7 @@ export default function PersonalizationPage() {
                     <Eye className="w-8 h-8 text-blue-500" />
                     <div>
                       <p className="text-2xl font-bold text-white">
-                        {preferences.watchedMovies.length}
+                        {preferences.stats.watchedMovies}
                       </p>
                       <p className="text-sm text-gray-400">Movies Watched</p>
                     </div>
@@ -393,7 +432,7 @@ export default function PersonalizationPage() {
                     <Star className="w-8 h-8 text-yellow-500" />
                     <div>
                       <p className="text-2xl font-bold text-white">
-                        {preferences.ratedMovies.length}
+                        {preferences.stats.ratedMovies}
                       </p>
                       <p className="text-sm text-gray-400">Movies Rated</p>
                     </div>
@@ -406,7 +445,9 @@ export default function PersonalizationPage() {
                   <div className="flex items-center gap-3">
                     <Clock className="w-8 h-8 text-green-500" />
                     <div>
-                      <p className="text-2xl font-bold text-white">4.7</p>
+                      <p className="text-2xl font-bold text-white">
+                        {preferences.stats.avgRating}
+                      </p>
                       <p className="text-sm text-gray-400">Avg Rating Given</p>
                     </div>
                   </div>
@@ -658,8 +699,6 @@ export default function PersonalizationPage() {
                     />
                   </div>
                 </div>
-
-                
               </CardContent>
             </Card>
 
@@ -679,6 +718,7 @@ export default function PersonalizationPage() {
                   Export My Data
                 </Button>
                 <Button
+                  onClick={handleRefreshRecommendations}
                   variant="outline"
                   className="w-full border-gray-600 hover:bg-gray-800 hover:text-white bg-transparent text-white"
                 >

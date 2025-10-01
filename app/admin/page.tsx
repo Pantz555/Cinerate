@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
@@ -54,7 +53,7 @@ import {
   X,
   Loader2,
 } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useMutation, usePaginatedQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { useQueryWithStatus } from "@/components/ConvexClientProvider";
@@ -81,12 +80,14 @@ export default function AdminPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: user } = useQueryWithStatus(api.auth.loggedInUser);
+  const { data: movieStats } = useQueryWithStatus(api.admin.getDashboardStats);
   const router = useRouter();
 
   // Form state for adding/editing movies
   const [movieForm, setMovieForm] = useState({
     title: "",
     description: "",
+    genres: [],
     genre: "",
     year: "",
     director: "",
@@ -101,10 +102,11 @@ export default function AdminPage() {
   });
 
   const {
-    data: movies,
-    isPending,
-    error,
-  } = useQueryWithStatus(api.movies.listMovies) || [];
+    results: movies,
+    status: paginationStatus,
+    loadMore,
+    isLoading: isPending,
+  } = usePaginatedQuery(api.movies.listMovies, {}, { initialNumItems: 4 });
 
   // Mutations
   const createMovie = useMutation(api.movies.createMovie);
@@ -120,18 +122,11 @@ export default function AdminPage() {
     );
   }
 
-  const stats = {
-    totalMovies: movies?.length,
-    publishedMovies: movies?.filter((m) => m.status === "published").length,
-    draftMovies: movies?.filter((m) => m.status === "draft").length,
-    totalViews: movies?.reduce((sum, m: any) => sum + m.views, 0),
-    totalReviews: movies?.reduce((sum, m: any) => sum + m?.reviews, 0),
-  };
-
   const resetForm = () => {
     const defaultForm = {
       title: "",
       description: "",
+      genres: [],
       genre: "",
       year: "",
       director: "",
@@ -142,7 +137,7 @@ export default function AdminPage() {
       rating: "",
       status: "published",
     };
-    setMovieForm({ ...defaultForm });
+    setMovieForm({ ...defaultForm } as any);
     setPosterFile(null);
     setPosterPreview("");
     setEditingMovie(null);
@@ -178,7 +173,7 @@ export default function AdminPage() {
     if (
       !movieForm.title ||
       !movieForm.director ||
-      !movieForm.genre ||
+      !movieForm.genres.length ||
       !movieForm.year ||
       !movieForm.description ||
       !movieForm.cast
@@ -206,6 +201,7 @@ export default function AdminPage() {
         title: movieForm.title,
         description: movieForm.description,
         genre: movieForm.genre,
+        genres: movieForm.genres,
         year: movieForm.year,
         director: movieForm.director,
         cast: movieForm.cast,
@@ -237,6 +233,9 @@ export default function AdminPage() {
       title: movie.title,
       description: movie.description || "",
       genre: movie.genre,
+      genres:
+        movie.genres ||
+        (movie.genre ? movie.genre.split(",").map((g: any) => g.trim()) : []),
       year: movie.year,
       director: movie.director,
       cast: movie.cast || "",
@@ -258,8 +257,8 @@ export default function AdminPage() {
     if (
       !movieForm.title ||
       !movieForm.director ||
-      !movieForm.genre ||
       !movieForm.year ||
+      !movieForm.genres.length ||
       !movieForm.description ||
       !movieForm.cast
     ) {
@@ -287,6 +286,7 @@ export default function AdminPage() {
         id: editingMovie._id,
         title: movieForm.title,
         description: movieForm.description,
+        genres: movieForm.genres,
         genre: movieForm.genre,
         year: movieForm.year,
         director: movieForm.director,
@@ -438,14 +438,20 @@ export default function AdminPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="genre" className="text-gray-300">
-                        Genre *
+                      <Label htmlFor="genres" className="text-gray-300">
+                        Genres *
                       </Label>
                       <Input
-                        id="genre"
-                        value={movieForm.genre}
-                        onChange={(e) =>
-                          setMovieForm({ ...movieForm, genre: e.target.value })
+                        id="genres"
+                        value={movieForm.genres.join(", ")} // Display as comma-separated for user
+                        onChange={(e: any) =>
+                          setMovieForm({
+                            ...movieForm,
+                            genres: e.target.value
+                              .split(",")
+                              .map((g: any) => g.trim())
+                              .filter((g: any) => g), // Convert to array
+                          })
                         }
                         className="bg-[#2a2d38] border-gray-600 text-white"
                         placeholder="Action, Drama, Sci-Fi"
@@ -702,7 +708,7 @@ export default function AdminPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-white">
-                      {stats.totalMovies}
+                      {movieStats?.overview.totalMovies}
                     </div>
                   </CardContent>
                 </Card>
@@ -715,7 +721,7 @@ export default function AdminPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-white">
-                      {stats.publishedMovies}
+                      {movieStats?.overview.publishedMovies}
                     </div>
                   </CardContent>
                 </Card>
@@ -728,7 +734,7 @@ export default function AdminPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-white">
-                      {stats.draftMovies}
+                      {movieStats?.overview.draftMovies}
                     </div>
                   </CardContent>
                 </Card>
@@ -741,7 +747,7 @@ export default function AdminPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-white">
-                      {stats?.totalViews?.toLocaleString()}
+                      {movieStats?.overview.totalViews}
                     </div>
                   </CardContent>
                 </Card>
@@ -754,7 +760,7 @@ export default function AdminPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-white">
-                      {stats?.totalReviews?.toLocaleString()}
+                      {movieStats?.overview.totalReviews}
                     </div>
                   </CardContent>
                 </Card>
@@ -813,9 +819,7 @@ export default function AdminPage() {
               </div>
 
               {/* Movies Grid */}
-              {error && (
-                <p className="text-center text-red-500 my-5">{error.message}</p>
-              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {isPending
                   ? Array.from({ length: 5 }).map((_, i) => (
@@ -972,21 +976,25 @@ export default function AdminPage() {
                                   <div className="grid grid-cols-2 gap-4">
                                     <div>
                                       <Label
-                                        htmlFor="edit-genre"
+                                        htmlFor="edit-genres"
                                         className="text-gray-300"
                                       >
-                                        Genre *
+                                        Genres *
                                       </Label>
                                       <Input
-                                        id="edit-genre"
-                                        value={movieForm.genre}
-                                        onChange={(e) =>
+                                        id="edit-genres"
+                                        value={movieForm.genres.join(", ")} // Display as comma-separated
+                                        onChange={(e: any) =>
                                           setMovieForm({
                                             ...movieForm,
-                                            genre: e.target.value,
+                                            genres: e.target.value
+                                              .split(",")
+                                              .map((g: any) => g.trim())
+                                              .filter((g: any) => g),
                                           })
                                         }
                                         className="bg-[#2a2d38] border-gray-600 text-white"
+                                        placeholder="Action, Drama, Sci-Fi"
                                       />
                                     </div>
                                     <div>
@@ -1190,18 +1198,20 @@ export default function AdminPage() {
                                     />
                                   </div>
 
-                                   <div>
-                    <Label className="text-gray-300">Trending</Label>
-                    <Switch
-                      checked={movieForm.trending}
-                      onCheckedChange={(v) =>
-                        setMovieForm({
-                          ...movieForm,
-                          trending: v,
-                        })
-                      }
-                    />
-                  </div>
+                                  <div>
+                                    <Label className="text-gray-300">
+                                      Trending
+                                    </Label>
+                                    <Switch
+                                      checked={movieForm.trending}
+                                      onCheckedChange={(v) =>
+                                        setMovieForm({
+                                          ...movieForm,
+                                          trending: v,
+                                        })
+                                      }
+                                    />
+                                  </div>
                                 </div>
                                 <div className="flex justify-end gap-2">
                                   <Button
@@ -1320,7 +1330,7 @@ export default function AdminPage() {
                     ))}
               </div>
 
-              {!isPending && !error && filteredMovies?.length === 0 && (
+              {!isPending && filteredMovies?.length === 0 && (
                 <div className="text-center py-12">
                   <Film className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-300 mb-2">
@@ -1329,6 +1339,27 @@ export default function AdminPage() {
                   <p className="text-gray-500">
                     Try adjusting your search or filter criteria.
                   </p>
+                </div>
+              )}
+
+              {/* Load More Button */}
+              {paginationStatus === "CanLoadMore" && (
+                <div className="flex justify-center mt-10">
+                  <Button
+                    onClick={() => loadMore(4)}
+                 
+                  >
+                    Load More Movies
+                  </Button>
+                </div>
+              )}
+
+              {paginationStatus === "LoadingMore" && (
+                <div className="flex justify-center mt-10">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span>Loading more movies...</span>
+                  </div>
                 </div>
               )}
             </TabsContent>
@@ -1342,15 +1373,6 @@ export default function AdminPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* <div className="text-center py-12">
-                    <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-300 mb-2">
-                      Analytics Coming Soon
-                    </h3>
-                    <p className="text-gray-500">
-                      Detailed analytics and insights will be available here.
-                    </p>
-                  </div> */}
                   <Analytics />
                 </CardContent>
               </Card>

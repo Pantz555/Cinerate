@@ -8,6 +8,7 @@ import {
   useQueries,
 } from "convex-helpers/react/cache";
 import { makeUseQueryWithStatus } from "convex-helpers/react";
+import BotButton from "./chat/chat-bot";
 
 export const useQueryWithStatus = makeUseQueryWithStatus(useQueries);
 
@@ -21,6 +22,7 @@ export default function ConvexClientProvider({
   return (
     <ConvexAuthNextjsProvider client={convex}>
       <ConvexQueryCacheProvider>{children}</ConvexQueryCacheProvider>
+      {/* <BotButton /> */}
     </ConvexAuthNextjsProvider>
   );
 }

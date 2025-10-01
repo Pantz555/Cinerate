@@ -4,9 +4,6 @@ import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
   ...authTables,
-  numbers: defineTable({
-    value: v.number(),
-  }),
 
   // User achievements
   achievements: defineTable({
@@ -72,7 +69,8 @@ export default defineSchema({
   movies: defineTable({
     title: v.string(),
     posterUrl: v.optional(v.string()), // Convex storage URL
-    genre: v.string(),
+    genre: v.optional(v.string()),
+    genres: v.optional(v.array(v.string())),
     year: v.string(),
     director: v.string(),
     cast: v.string(),
@@ -97,7 +95,8 @@ export default defineSchema({
     .index("by_genre", ["genre"])
     .index("by_year", ["year"])
     .index("by_rating", ["avgRating"])
-    .index("by_trending", ["trending", "trendingScore"]),
+    .index("by_trending", ["trending", "trendingScore"])
+    .searchIndex("search_genres", { searchField: "genres" }),
 
   // Extend the users table
   users: defineTable({
@@ -224,7 +223,8 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_score", ["userId", "score"])
-    .index("by_expires", ["expiresAt"]),
+    .index("by_expires", ["expiresAt"])
+    .index("by_user_movie", ["userId", "movieId"]),
 
   // Community reviews (public reviews separate from personal ratings)
   communityReviews: defineTable({

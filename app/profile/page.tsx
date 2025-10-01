@@ -41,6 +41,7 @@ import { useQuery } from "convex-helpers/react";
 import MovieSkeleton from "@/components/skeleton/movie-skeleton";
 import EditModal from "@/components/edit-modal";
 import { Id } from "@/convex/_generated/dataModel";
+import { usePaginatedQuery } from "convex/react";
 
 export default function ProfilePage() {
   const [activeNav, setActiveNav] = useState("Home");
@@ -57,11 +58,14 @@ export default function ProfilePage() {
     },
   );
 
-  const { data: personalizedPicks } = useQuery(
+  const {
+    results: personalizedPicks,
+    status: personalizedStatus,
+    loadMore,
+  } = usePaginatedQuery(
     api.movies.getPersonalizedPicks,
-    {
-      limit: 5,
-    },
+    {},
+    { initialNumItems: 10 },
   );
 
   // New queries for real stats
@@ -621,7 +625,8 @@ export default function ProfilePage() {
             Personalized Recommendations
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
-            {personalizedPicks === undefined ? (
+            {personalizedStatus === "LoadingFirstPage" &&
+            personalizedPicks.length === 0 ? (
               [...Array(10)].map((_, i) => <MovieSkeleton key={i} />)
             ) : personalizedPicks.length > 0 ? (
               personalizedPicks?.map((movie) => (

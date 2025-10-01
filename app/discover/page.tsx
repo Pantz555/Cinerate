@@ -24,19 +24,20 @@ import {
   Film,
   Play,
   Sparkles,
+  ChevronRight,
 } from "lucide-react";
 import { useQuery } from "convex-helpers/react";
 import { api } from "@/convex/_generated/api";
-import { useAction } from "convex/react";
+import { useAction, usePaginatedQuery } from "convex/react";
 import { useDebouncedValue } from "@mantine/hooks";
 import { StructuredMovies } from "@/lib/types";
+import MovieCard from "@/components/movie-card";
 
 export default function DiscoverPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedRating, setSelectedRating] = useState("");
-  const [viewMode, setViewMode] = useState("grid");
   const { data, isPending: featuredLoading } = useQuery(
     api.movies.getMoviesWithFilters,
     {
@@ -52,19 +53,17 @@ export default function DiscoverPage() {
   const [isSearching, setIsSearching] = useState(false);
 
   // Get personalized picks based on user ratings
-  const { data: personalizedPicks, isPending: personalizedLoading } = useQuery(
-    api.movies.getPersonalizedPicks,
-    { limit: 8 },
-  );
-
-  // Get user preferences for display
-  const { data: userPreferences } = useQuery(api.movies.getUserPreferences, {});
+  const { results: personalizedPicks, status: personalizedStatus } =
+    usePaginatedQuery(
+      api.movies.getPersonalizedPicks,
+      {},
+      { initialNumItems: 10 },
+    );
 
   useEffect(() => {
     const fetch = async () => {
       setIsSearching(true);
       const data = await searchMovie({ query: debounced });
-      console.log("value", data);
       const structuredMovies = data?.results
         .map((result) => {
           const entry = data.entries.find((e) => e.entryId === result.entryId);
@@ -109,31 +108,32 @@ export default function DiscoverPage() {
   const featuredMovie = data ? data[0] : null;
 
   // Trending
-  const { data: trendingMovies, isPending: trendingLoading } = useQuery(
-    api.movies.getMoviesWithFilters,
-    {
-      sortBy: "trending",
-    },
+  const { results: trendingMovies, status: trendingStatus } = usePaginatedQuery(
+    api.movies.getMoviesWithFiltersPaginated,
+    { sortBy: "trending" },
+    { initialNumItems: 10 },
   );
-
-  // New releases
-  const { data: newReleases, isPending: newReleasedLoading } = useQuery(
-    api.movies.getMoviesWithFilters,
+  const { results: newReleases, status: newReleasesStatus } = usePaginatedQuery(
+    api.movies.getMoviesWithFiltersPaginated,
     {
-      isNew: true,
       sortBy: "recent",
     },
+    { initialNumItems: 10 },
   );
 
   // By category (example: Sci-Fi)
-  const { data: sciFiMovies, isPending: scifiLoading } = useQuery(
-    api.movies.getMoviesWithFilters,
+  const { results: sciFiMovies, status: scifiStatus } = usePaginatedQuery(
+    api.movies.getMoviesWithFiltersPaginated,
     {
       genre: "sci-fi",
     },
+    { initialNumItems: 10 },
   );
-  const { data: hiddenGems, isPending: hiddenGenLoading } = useQuery(
+
+  const { results: hiddenGems, status: hiddenStatus } = usePaginatedQuery(
     api.movies.getHiddenGems,
+    {},
+    { initialNumItems: 10 },
   );
 
   const handleRandomMovie = () => {
@@ -161,6 +161,21 @@ export default function DiscoverPage() {
       </div>
     </div>
   );
+
+  const personalizationLoading =
+    personalizedStatus === "LoadingFirstPage" && personalizedPicks.length === 0;
+
+  const hiddenLoading =
+    hiddenStatus === "LoadingFirstPage" && hiddenGems.length === 0;
+
+  const genreLoading =
+    scifiStatus === "LoadingFirstPage" && sciFiMovies.length === 0;
+
+  const newReleasesLoading =
+    newReleasesStatus === "LoadingFirstPage" && newReleases.length === 0;
+
+  const trendingLoading =
+    trendingStatus === "LoadingFirstPage" && trendingMovies.length === 0;
 
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-[#111317]">
@@ -315,22 +330,22 @@ export default function DiscoverPage() {
                   </SelectTrigger>
                   <SelectContent className="bg-[#1d2027] border-gray-600">
                     <SelectItem
-                      value="9+"
+                      value="4+"
                       className="text-white hover:bg-gray-700"
                     >
-                      9.0+
+                      4.0+
                     </SelectItem>
                     <SelectItem
-                      value="8+"
+                      value="3+"
                       className="text-white hover:bg-gray-700"
                     >
-                      8.0+
+                      3.0+
                     </SelectItem>
                     <SelectItem
-                      value="7+"
+                      value="2+"
                       className="text-white hover:bg-gray-700"
                     >
-                      7.0+
+                      2.0+
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -395,13 +410,7 @@ export default function DiscoverPage() {
                                 style={{
                                   backgroundImage: `url("${movie?.posterUrl || "/placeholder.jpg"}")`,
                                 }}
-                              >
-                                {/* {movie.status !== "published" && (
-                                          <div className="bg-black bg-opacity-75 text-white text-xs px-2 py-1 m-2 rounded inline-block">
-                                            {movie.status}
-                                          </div>
-                                        )} */}
-                              </div>
+                              ></div>
                             </Link>
                             <div className="p-3">
                               <Link href={`/movie/${movie.movieId}`}>
@@ -410,26 +419,8 @@ export default function DiscoverPage() {
                                 </h3>
                               </Link>
                               <p className="text-xs">Score: {movie?.score}</p>
-                              {/* <div className="flex items-center justify-between mt-2">
-                                        <div className="flex items-center gap-1">
-                                          <Star className="h-3 w-3 text-amber-400 fill-current" />
-                                          <span className="text-gray-300 text-xs font-medium">
-                                            {movie.avgRating?.toFixed(1) ||
-                                              movie.rating?.toFixed(1) ||
-                                              "N/A"}
-                                          </span>
-                                        </div>
-                                        <span className="text-gray-500 text-xs">
-                                          {movie.year}
-                                        </span>
-                                      </div>
-                                      {movie.trending && (
-                                        <div className="flex items-center gap-1 mt-2 text-green-400">
-                                          <TrendingUp className="h-3 w-3" />
-                                          <span className="text-xs">Trending</span>
-                                        </div>
-                                      )} */}
-                              <div className="flex gap-1 mt-3">
+
+                              <div className="flex flex-wrap flex-1 gap-1 mt-3">
                                 <Button
                                   size="sm"
                                   className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-xs h-7"
@@ -498,7 +489,7 @@ export default function DiscoverPage() {
                                   <span className="text-xs">Trending</span>
                                 </div>
                               )}
-                              <div className="flex gap-1 mt-3">
+                              <div className="flex flex-wrap flex-1 gap-1 mt-3">
                                 <Button
                                   size="sm"
                                   className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-xs h-7"
@@ -553,18 +544,46 @@ export default function DiscoverPage() {
           ) : (
             <>
               {/* Trending Now */}
-              <section className="mb-12">
-                <div className="flex items-center gap-3 mb-6">
-                  <TrendingUp className="h-6 w-6 text-red-500" />
-                  <h2 className="text-white text-2xl font-bold">
-                    Trending Now
-                  </h2>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
-                  {trendingLoading ? (
-                    [...Array(5)].map((_, i) => <MovieSkeleton key={i} />)
-                  ) : trendingMovies && trendingMovies?.length > 0 ? (
-                    trendingMovies?.map((movie) => (
+              {trendingLoading ? (
+                <section className="mb-12">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-3 mb-6">
+                      <TrendingUp className="h-6 w-6 text-red-500" />
+                      <h2 className="text-white text-2xl font-bold">
+                        Trending Now
+                      </h2>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {[...Array(5)].map((_, i) => (
+                      <MovieSkeleton key={i} />
+                    ))}
+                  </div>
+                </section>
+              ) : trendingMovies && trendingMovies.length > 0 ? (
+                <section className="mb-12">
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-6">
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className="h-6 w-6 text-red-500" />
+                      <h2 className="text-white text-2xl font-bold">
+                        Trending Now
+                      </h2>
+                    </div>
+
+                    {trendingMovies?.length > 0 && (
+                      <Button
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        asChild
+                      >
+                        <Link href={`/movies/all?sortBy=trending`}>
+                          View All
+                          <ChevronRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {trendingMovies?.map((movie) => (
                       <Link
                         key={movie._id}
                         href={`/movie/${movie._id}`}
@@ -594,27 +613,52 @@ export default function DiscoverPage() {
                           </div>
                         </div>
                       </Link>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">
-                      No trending movies at the moment
-                    </p>
-                  )}
-                </div>
-              </section>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
               {/* New Releases */}
-              <section className="mb-12">
-                <div className="flex items-center gap-3 mb-6">
-                  <Clock className="h-6 w-6 text-green-500" />
-                  <h2 className="text-white text-2xl font-bold">
-                    New Releases
-                  </h2>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
-                  {newReleasedLoading ? (
-                    [...Array(5)].map((_, i) => <MovieSkeleton key={i} />)
-                  ) : newReleases && newReleases.length > 0 ? (
-                    newReleases?.map((movie) => (
+              {newReleasesLoading ? (
+                <section className="mb-12">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Clock className="h-6 w-6 text-green-500" />
+                      <h2 className="text-white text-2xl font-bold">
+                        New Releases
+                      </h2>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {[...Array(5)].map((_, i) => (
+                      <MovieSkeleton key={i} />
+                    ))}
+                  </div>
+                </section>
+              ) : newReleases && newReleases.length > 0 ? (
+                <section className="mb-12">
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-6">
+                    <div className="flex items-center gap-3">
+                      <Clock className="h-6 w-6 text-green-500" />
+                      <h2 className="text-white text-2xl font-bold">
+                        New Releases
+                      </h2>
+                    </div>
+
+                    {newReleases?.length > 4 && (
+                      <Button
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        asChild
+                      >
+                        <Link href={`/movies/all?sortBy=recent`}>
+                          View All
+                          <ChevronRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {newReleases?.map((movie) => (
                       <Link
                         key={movie._id}
                         href={`/movie/${movie._id}`}
@@ -644,118 +688,146 @@ export default function DiscoverPage() {
                           </div>
                         </div>
                       </Link>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">
-                      No new released movies at the moment
-                    </p>
-                  )}
-                </div>
-              </section>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
               {/* Genre Categories */}
-              <section className="mb-12">
-                <h2 className="text-white text-2xl font-bold mb-6">
-                  Sci-Fi Movies
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
-                  {scifiLoading ? (
-                    [...Array(5)].map((_, i) => <MovieSkeleton key={i} />)
-                  ) : sciFiMovies && sciFiMovies.length > 0 ? (
-                    sciFiMovies?.map((movie) => (
-                      <Link
-                        key={movie._id}
-                        href={`/movie/${movie._id}`}
-                        className="group"
+              {genreLoading ? (
+                <section className="mb-12">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <h2 className="text-white text-2xl font-bold mb-6">
+                      Sci-Fi Movies
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {[...Array(5)].map((_, i) => (
+                      <MovieSkeleton key={i} />
+                    ))}
+                  </div>
+                </section>
+              ) : sciFiMovies && sciFiMovies.length > 0 ? (
+                <section className="mb-12">
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-6">
+                    <h2 className="text-white text-2xl font-bold">
+                      Sci-Fi Movies
+                    </h2>
+
+                    {sciFiMovies?.length > 0 && (
+                      <Button
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        asChild
                       >
-                        <div className="aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
-                          <img
-                            src={movie.posterUrl || "/placeholder.svg"}
-                            alt={movie.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                        <div className="mt-3">
-                          <h3 className="text-white font-medium text-sm truncate">
-                            {movie.title}
-                          </h3>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                            <span className="text-gray-300 text-sm">
-                              {movie.avgRating || "N/A"}
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">
-                      No Sci-fi movies at the moment
-                    </p>
-                  )}
-                </div>
-              </section>
+                        <Link href={`/movies/all?genre=sci-fi`}>
+                          View All
+                          <ChevronRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {sciFiMovies?.map((movie) => (
+                      <MovieCard movie={movie} />
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
               {/* Hidden Gems */}
-              <section className="mb-12">
-                <div className="flex items-center gap-3 mb-6">
-                  <Award className="h-6 w-6 text-purple-500" />
-                  <h2 className="text-white text-2xl font-bold">Hidden Gems</h2>
-                  <span className="text-gray-400 text-sm">
-                    Highly rated with fewer reviews
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
-                  {hiddenGenLoading ? (
-                    [...Array(5)].map((_, i) => <MovieSkeleton key={i} />)
-                  ) : hiddenGems && hiddenGems.length > 0 ? (
-                    hiddenGems?.map((movie) => (
-                      <Link
-                        key={movie._id}
-                        href={`/movie/${movie._id}`}
-                        className="group"
+              {hiddenLoading ? (
+                <section className="mb-12">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Award className="h-6 w-6 text-purple-500" />
+                      <h2 className="text-white text-2xl font-bold">
+                        Hidden Gems
+                      </h2>
+                      <span className="text-gray-400 text-sm">
+                        Highly rated with fewer reviews
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {[...Array(5)].map((_, i) => (
+                      <MovieSkeleton key={i} />
+                    ))}
+                  </div>
+                </section>
+              ) : hiddenGems && hiddenGems.length > 0 ? (
+                <section className="mb-12">
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-6">
+                    <div className="flex items-center gap-3 ">
+                      <Award className="h-6 w-6 text-purple-500" />
+                      <h2 className="text-white text-2xl font-bold">
+                        Hidden Gems
+                      </h2>
+                      <span className="text-gray-400 text-sm">
+                        Highly rated with fewer reviews
+                      </span>
+                    </div>
+
+                    {hiddenGems?.length > 4 && (
+                      <Button
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        asChild
                       >
-                        <div className="aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
-                          <img
-                            src={movie.posterUrl || "/placeholder.svg"}
-                            alt={movie.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                        <div className="mt-3">
-                          <h3 className="text-white font-medium text-sm truncate">
-                            {movie.title}
-                          </h3>
-                          <div className="flex items-center justify-between mt-1">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <span className="text-gray-300 text-sm">
-                                {movie.avgRating || "N/A"}
-                              </span>
-                            </div>
-                            <span className="text-gray-500 text-xs">
-                              {movie.reviews} reviews
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">
-                      No hidden gems at the moment
-                    </p>
-                  )}
-                </div>
-              </section>
+                        <Link href={`/movies/all?type=hidden`}>
+                          View All
+                          <ChevronRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {hiddenGems?.map((movie) => (
+                      <MovieCard movie={movie} />
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
               {/* Personalized Recommendations */}
-              <section className="mb-12">
-                <div className="flex items-center gap-3 mb-6">
-                  <Heart className="h-6 w-6 text-pink-500" />
-                  <h2 className="text-white text-2xl font-bold">
-                    Based on Your Ratings
-                  </h2>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
-                  {personalizedPicks && personalizedPicks.length > 0 ? (
-                    personalizedPicks?.map((movie) => (
+              {personalizationLoading ? (
+                <section className="mb-12">
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-6">
+                    <div className="flex items-center gap-3 ">
+                      <Heart className="h-6 w-6 text-pink-500" />
+                      <h2 className="text-white text-2xl font-bold">
+                        Based on Your Ratings
+                      </h2>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {[...Array(5)].map((_, i) => (
+                      <MovieSkeleton key={i} />
+                    ))}
+                  </div>
+                </section>
+              ) : personalizedPicks && personalizedPicks.length > 0 ? (
+                <section className="mb-12">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Heart className="h-6 w-6 text-pink-500" />
+                      <h2 className="text-white text-2xl font-bold">
+                        Based on Your Ratings
+                      </h2>
+                    </div>
+
+                    {personalizedPicks?.length > 4 && (
+                      <Button
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        asChild
+                      >
+                        <Link href={`/movies/all?type=personalized`}>
+                          View All
+                          <ChevronRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {personalizedPicks?.map((movie) => (
                       <div key={movie._id} className="group">
                         <div className="bg-[#1d2027] rounded-lg overflow-hidden hover:bg-[#252932] transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10">
                           <Link href={`/movie/${movie._id}`}>
@@ -799,7 +871,7 @@ export default function DiscoverPage() {
                                   "Based on your preferences"}
                               </p>
                             </div>
-                            <div className="flex gap-1 mt-3">
+                            <div className="flex flex-wrap flex-1 gap-1 mt-3">
                               <Button
                                 size="sm"
                                 className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-xs h-7"
@@ -825,14 +897,10 @@ export default function DiscoverPage() {
                           </div>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">
-                      No personalized picks for now.
-                    </p>
-                  )}
-                </div>
-              </section>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
             </>
           )}
         </div>

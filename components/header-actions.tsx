@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+
 import Link from "next/link";
 import React from "react";
 import { useQueryWithStatus } from "./ConvexClientProvider";
@@ -18,9 +18,7 @@ const HeaderActions = () => {
         <>
           {user.role && "admin" && (
             <Link href="/admin">
-              <div className="">
-                Admin panel
-              </div>
+              <div className="">Admin panel</div>
             </Link>
           )}
           <Link href="/profile">

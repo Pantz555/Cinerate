@@ -10,6 +10,7 @@ import {
   Trash2,
   MessageCircle,
   Send,
+  Loader2,
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Id, Doc } from "@/convex/_generated/dataModel";
@@ -23,12 +24,13 @@ import { motion, AnimatePresence } from "framer-motion";
 interface MovieCommentsProps {
   movieId: Id<"movies">;
   currentUserId?: Id<"users">;
-  user?: Doc<"users">
+  user?: Doc<"users">;
 }
 
 interface CommentItemProps {
   comment: any;
   currentUserId?: Id<"users">;
+  isDeleting: boolean;
   onReply: (commentId: Id<"movieComments">) => void;
   onEdit: (commentId: Id<"movieComments">, content: string) => void;
   onDelete: (commentId: Id<"movieComments">) => void;
@@ -47,6 +49,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   onDelete,
   onReact,
   userReactions,
+  isDeleting,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
@@ -73,23 +76,21 @@ const CommentItem: React.FC<CommentItemProps> = ({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-start gap-3">
-         <div
-                                    className="size-8 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
-                                    style={{
-                                      backgroundImage: comment.user?.image
-                                        ? `url("${comment.user.image}")`
-                                        : undefined,
-                                    }}
-                                  >
-                                    {!comment.user.image && (
-                                      <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
-                                        {comment.user.name
-                                          ?.charAt(0)
-                                          ?.toUpperCase() || "A"}
-                                      </div>
-                                    )}
-                                  </div>
-     
+        <div
+          className="size-8 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: comment.user?.image
+              ? `url("${comment.user.image}")`
+              : undefined,
+          }}
+        >
+          {!comment.user.image && (
+            <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+              {comment.user.name?.charAt(0)?.toUpperCase() || "A"}
+            </div>
+          )}
+        </div>
+
         <div className="flex-1">
           <div className="bg-[#1a1d23] border border-[#292d38] p-3 rounded-lg">
             <div className="flex items-center justify-between mb-2">
@@ -114,7 +115,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
                     onClick={() => onDelete(comment._id)}
                     className="text-[#9ea4b7] hover:text-red-400 transition-colors p-1"
                   >
-                    <Trash2 className="h-3 w-3" />
+                    {isDeleting ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3 w-3" />
+                    )}
                   </button>
                 </div>
               )}
@@ -215,6 +220,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
               >
                 <CommentItem
                   comment={reply}
+                  isDeleting={isDeleting}
                   currentUserId={currentUserId}
                   onReply={onReply}
                   onEdit={onEdit}
@@ -234,7 +240,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
 export default function MovieComments({
   movieId,
   currentUserId,
-  user
+  user,
 }: MovieCommentsProps) {
   const router = useRouter();
   const [newComment, setNewComment] = useState("");
@@ -246,6 +252,11 @@ export default function MovieComments({
     numItems: 10,
     cursor: null as string | null,
   });
+
+  const [isCommenting, setIsCommenting] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: comments } = useQuery(api.movieComments.getMovieComments, {
     movieId,
@@ -276,14 +287,19 @@ export default function MovieComments({
       return;
     }
 
+    setIsCommenting(true);
     try {
       await addComment({
         movieId,
         content: newComment,
       });
       setNewComment("");
+      setIsCommenting(false);
+
       toast.success("Comment added!");
     } catch (error: any) {
+      setIsCommenting(false);
+
       toast.error(error.message || "Failed to add comment");
     }
   };
@@ -300,6 +316,7 @@ export default function MovieComments({
       return;
     }
 
+    setIsReplying(true);
     try {
       await addComment({
         movieId,
@@ -307,9 +324,13 @@ export default function MovieComments({
         parentCommentId: replyingTo,
       });
       setReplyContent("");
+      setIsReplying(false);
+
       setReplyingTo(null);
       toast.success("Reply added!");
     } catch (error: any) {
+      setIsReplying(false);
+
       toast.error(error.message || "Failed to add reply");
     }
   };
@@ -319,20 +340,28 @@ export default function MovieComments({
     content: string,
   ) => {
     try {
+      setIsEditing(true);
       await editComment({ commentId, content });
+      setIsEditing(false);
+
       toast.success("Comment updated!");
     } catch (error: any) {
+      setIsEditing(false);
       toast.error(error.message || "Failed to update comment");
     }
   };
 
   const handleDeleteComment = async (commentId: Id<"movieComments">) => {
     if (!confirm("Are you sure you want to delete this comment?")) return;
-
+    setIsDeleting(true);
     try {
       await deleteComment({ commentId });
+      setIsDeleting(false);
+
       toast.success("Comment deleted!");
     } catch (error: any) {
+      setIsDeleting(false);
+
       toast.error(error.message || "Failed to delete comment");
     }
   };
@@ -371,21 +400,19 @@ export default function MovieComments({
       <div className="mb-6">
         <div className="flex gap-3">
           <div
-                                    className="size-8 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
-                                    style={{
-                                      backgroundImage: user?.image
-                                        ? `url("${user?.image}")`
-                                        : undefined,
-                                    }}
-                                  >
-                                    {!user?.image && (
-                                      <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
-                                        {user?.name
-                                          ?.charAt(0)
-                                          ?.toUpperCase() || "A"}
-                                      </div>
-                                    )}
-                                  </div>
+            className="size-8 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: user?.image
+                ? `url("${user?.image}")`
+                : undefined,
+            }}
+          >
+            {!user?.image && (
+              <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+                {user?.name?.charAt(0)?.toUpperCase() || "A"}
+              </div>
+            )}
+          </div>
           <div className="flex-1">
             <textarea
               value={newComment}
@@ -406,12 +433,27 @@ export default function MovieComments({
               </p>
               <Button
                 onClick={handleAddComment}
-                disabled={!currentUserId || !newComment.trim()}
+                disabled={
+                  !currentUserId ||
+                  !newComment.trim() ||
+                  isCommenting ||
+                  isDeleting ||
+                  isEditing ||
+                  isReplying
+                }
                 size="sm"
                 className="flex items-center gap-2"
               >
-                <Send className="h-4 w-4" />
-                Comment
+                {isCommenting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    Comment
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -445,8 +487,17 @@ export default function MovieComments({
             >
               Cancel
             </Button>
-            <Button onClick={handleAddReply} size="sm">
-              Reply
+            <Button
+              disabled={isCommenting || isDeleting || isEditing || isReplying}
+              onClick={handleAddReply}
+              size="sm"
+              className="flex items-center justify-center"
+            >
+              {isReplying ? (
+                <Loader2 className="size-4 shrink-0 animate-spin" />
+              ) : (
+                "Reply"
+              )}
             </Button>
           </div>
         </div>
@@ -465,6 +516,7 @@ export default function MovieComments({
                 transition={{ duration: 0.25 }}
               >
                 <CommentItem
+                  isDeleting={isDeleting}
                   comment={comment}
                   currentUserId={currentUserId}
                   onReply={setReplyingTo}

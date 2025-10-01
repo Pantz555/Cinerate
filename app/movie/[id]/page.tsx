@@ -5,13 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/header";
-import {
-  Star,
-  StarHalf,
-  BookmarkPlus,
-  ThumbsUp,
-  ThumbsDown,
-} from "lucide-react";
+import { Star, StarHalf, BookmarkPlus, ThumbsUp } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
@@ -20,8 +14,9 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex-helpers/react";
 import MovieDetailsSkeleton from "@/components/skeleton/movie-detatils-skeleton";
-import { useAuthActions } from "@convex-dev/auth/react";
+
 import MovieComments from "@/components/MovieComments";
+import { useMovieView } from "@/hooks/use-movie-view";
 
 export default function MovieDetailsPage({
   params,
@@ -29,10 +24,22 @@ export default function MovieDetailsPage({
   params: { id: string };
 }) {
   const { id } = use<any>(params as any);
+
+  //track movie view
+  useMovieView(id);
+
   const router = useRouter();
   const [paginationOpts, setPaginationOpts] = useState({
     numItems: 5,
     cursor: null as string | null,
+  });
+
+  // view stats
+  const hasViewed = useQuery(api.viewTracking.hasUserViewedMovie, {
+    movieId: id,
+  });
+  const viewStats = useQuery(api.viewTracking.getMovieViewStats, {
+    movieId: id,
   });
 
   const {
@@ -207,13 +214,20 @@ export default function MovieDetailsPage({
             {/* Movie Info Section */}
             <section>
               <div className="flex flex-col gap-2">
+                {hasViewed?.data && (
+                  <span className="badge text-sm text-green-400">
+                    ✓ Watched
+                  </span>
+                )}
                 <p className="text-white/80 text-base font-medium">
                   {movie.year} • PG-13 • {movie.duration || "Unknown"}
                 </p>
                 <h1 className="text-white text-4xl md:text-5xl font-extrabold tracking-tight">
                   {movie.title}
                 </h1>
-                <p className="text-white/80 text-base">{movie.genre}</p>
+                <p className="text-white/80 text-base">
+                  {movie?.genres?.join(", ")}
+                </p>
                 <p className="text-[#9ea4b7] max-w-3xl mt-2 text-base leading-relaxed">
                   {movie.description}
                 </p>
@@ -248,7 +262,7 @@ export default function MovieDetailsPage({
                       ))}
                   </div>
                   <p className="text-white/70 text-sm font-medium">
-                    {movie.reviews || 0} reviews
+                    {movie?.totalRatings || 0} reviews
                   </p>
                 </div>
                 {/* Dynamic rating distribution */}
@@ -268,6 +282,41 @@ export default function MovieDetailsPage({
                       </p>
                     </div>
                   ))}
+                </div>
+              </div>
+            </section>
+
+            {/* View Stats Card */}
+            <section className="p-6 bg-[#1a1d23] rounded-lg border border-[#292d38]">
+              <h2 className="text-white text-2xl font-bold mb-6">View Stats</h2>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-3xl font-extrabold text-blue-500">
+                    {viewStats?.data?.totalViews || 0}
+                  </p>
+                  <p className="text-white/70 text-sm">Total Views</p>
+                </div>
+
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-3xl font-extrabold text-green-500">
+                    {viewStats?.data?.recentViews || 0}
+                  </p>
+                  <p className="text-white/70 text-sm">Recent Views</p>
+                </div>
+
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-3xl font-extrabold text-yellow-500">
+                    {viewStats?.data?.uniqueViewers || 0}
+                  </p>
+                  <p className="text-white/70 text-sm">Unique Viewers</p>
+                </div>
+
+                <div className="flex flex-col items-center gap-2">
+                  <p className="text-3xl font-extrabold text-pink-500">
+                    {viewStats?.data?.totalRatings || 0}
+                  </p>
+                  <p className="text-white/70 text-sm">Total Ratings</p>
                 </div>
               </div>
             </section>

@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { useQuery } from "convex-helpers/react";
 import { useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
+import { useQueryWithStatus } from "@/components/ConvexClientProvider";
+import { Loader2 } from "lucide-react";
 
 export default function MovieRatingPage({
   params,
@@ -33,7 +35,11 @@ export default function MovieRatingPage({
   const [review, setReview] = useState("");
   const [isPublicReview, setIsPublicReview] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const router = useRouter();
+
+  const { data: user } = useQueryWithStatus(api.auth.loggedInUser);
 
   // Queries
   const { data: movie } = useQuery(api.movies.getMovieById, {
@@ -116,6 +122,12 @@ export default function MovieRatingPage({
       return;
     }
 
+    if (!user?._id) {
+      toast.error("Please login to review!");
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       await submitRating({
         movieId: id as Id<"movies">,
@@ -126,11 +138,14 @@ export default function MovieRatingPage({
 
       toast.success("Rating submitted successfully!");
       handleClick();
+      setIsSubmitting(false);
 
       setTimeout(() => {
         router.push(`/movie/${id}`);
       }, 1000);
     } catch (error) {
+      setIsSubmitting(false);
+
       console.error("Failed to submit rating:", error);
       toast.error("Error submitting rating");
     }
@@ -364,15 +379,21 @@ export default function MovieRatingPage({
                   </Button>
                 </Link>
                 <Button
-                  className={`w-full shadow-lg sm:w-auto ${
+                  className={`w-full flex border-[#3d4252] items-center justify-center shadow-lg sm:w-auto ${
                     hasRatings
                       ? "bg-[var(--primary-600)] text-white shadow-[var(--primary-500)]/20 hover:bg-[var(--primary-700)] hover:shadow-xl hover:shadow-[var(--primary-500)]/30"
                       : "bg-gray-600 text-gray-300 cursor-not-allowed"
                   }`}
                   onClick={handleSubmit}
-                  disabled={!hasRatings}
+                  disabled={!hasRatings || isSubmitting}
                 >
-                  {existingRating ? "Update Rating" : "Submit Rating"}
+                  {isSubmitting ? (
+                    <Loader2 className="size-5 animate-spin shrink-0" />
+                  ) : existingRating ? (
+                    "Update Rating"
+                  ) : (
+                    "Submit Rating"
+                  )}
                 </Button>
               </div>
             </div>

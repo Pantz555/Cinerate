@@ -1,6 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { api, internal } from "./_generated/api";
 
 export const submitRating = mutation({
   args: {
@@ -107,6 +108,25 @@ export const submitRating = mutation({
     await updateMovieRating(ctx, args.movieId);
 
     await updateUserRatingAchievements(ctx, user._id);
+
+    // Schedule personality profile update
+    await ctx.scheduler.runAfter(
+      0,
+      internal.recommendations.updatePersonalityProfile,
+      {
+        userId,
+      },
+    );
+
+    // Schedule new recommendations generation
+    await ctx.scheduler.runAfter(
+      1000, // 1 second delay
+      api.recommendations.generateRecommendations,
+      {
+        limit: 20,
+        refreshCache: true,
+      },
+    );
 
     return { success: true, ratingId };
   },

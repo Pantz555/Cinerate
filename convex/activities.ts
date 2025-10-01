@@ -179,3 +179,40 @@ export const markActivitiesAsRead = mutation({
     }
   },
 });
+
+// Delete all admin activities
+export const deleteAllAdminActivities = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new ConvexError("Unauthorized");
+    }
+
+    const user = await ctx.db.get(userId);
+    if (!user || user.role !== "admin") {
+      throw new ConvexError("Access denied");
+    }
+
+    // Get all admin activities (not limited, delete all)
+    const activities = await ctx.db
+      .query("activityFeed")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const adminActivities = activities.filter((activity) =>
+      [
+        "movie_created",
+        "movie_updated",
+        "movie_deleted",
+        "movie_status_changed",
+      ].includes(activity.activityType),
+    );
+
+    for (const activity of adminActivities) {
+      await ctx.db.delete(activity._id);
+    }
+
+    return { deleted: adminActivities.length };
+  },
+});

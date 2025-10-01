@@ -1,13 +1,35 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Film, Edit, Trash2, Eye, Clock, User, RefreshCw } from "lucide-react";
+import {
+  Film,
+  Edit,
+  Trash2,
+  Eye,
+  Clock,
+  User,
+  RefreshCw,
+  Loader2,
+} from "lucide-react";
 import { useQueryWithStatus } from "@/components/ConvexClientProvider";
 import { api } from "@/convex/_generated/api";
 import Image from "next/image";
+import { useMutation } from "convex/react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
 
 const RecentActivityCard = () => {
   const {
@@ -15,6 +37,12 @@ const RecentActivityCard = () => {
     isPending,
     error,
   } = useQueryWithStatus(api.activities.getAdminActivities, { limit: 10 });
+
+  const deleteAdminActivities = useMutation(
+    api.activities.deleteAllAdminActivities,
+  );
+
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const getActivityIcon = (activityType: string) => {
     switch (activityType) {
@@ -76,6 +104,18 @@ const RecentActivityCard = () => {
     return "Just now";
   };
 
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const res = await deleteAdminActivities({});
+      toast.success(`${res.deleted} admin activities deleted`);
+      setIsDeleting(false);
+    } catch (err) {
+      toast.error("Failed to delete admin activities");
+      setIsDeleting(false);
+    }
+  };
+
   if (error) {
     return (
       <Card className="bg-[#1a1d23] border-gray-700">
@@ -94,113 +134,168 @@ const RecentActivityCard = () => {
   }
 
   return (
-    <Card className="bg-[#1a1d23] border-gray-700">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-white flex items-center gap-2">
-          <Clock className="h-5 w-5" />
-          Recent Activity
-        </CardTitle>
-        <Button
-          size="sm"
-          variant="outline"
-          className="border-gray-600 text-white hover:bg-gray-700 bg-transparent"
-          disabled={isPending}
-        >
-          <RefreshCw className={`h-4 w-4 ${isPending ? "animate-spin" : ""}`} />
-        </Button>
-      </CardHeader>
-      <CardContent>
-        {isPending ? (
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-4 p-3 rounded-lg bg-gray-800/30 animate-pulse"
-              >
-                <div className="w-12 h-16 bg-gray-700 rounded"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-700 rounded w-1/2"></div>
-                </div>
-                <div className="h-6 w-16 bg-gray-700 rounded"></div>
-              </div>
-            ))}
-          </div>
-        ) : activities && activities.length > 0 ? (
-          <div className="space-y-4 max-h-96 overflow-y-auto">
-            {activities.map((activity) => (
-              <div
-                key={activity._id}
-                className="flex items-start gap-4 p-3 rounded-lg bg-gray-800/30 hover:bg-gray-800/50 transition-colors"
-              >
-                <div className="flex-shrink-0 mt-1">
-                  {getActivityIcon(activity.activityType)}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-white text-sm font-medium leading-relaxed">
-                      {getActivityMessage(activity)}
-                    </p>
-                    <span className="text-gray-400 text-xs whitespace-nowrap">
-                      {formatTimeAgo(activity.createdAt)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-2">
-                    <User className="h-3 w-3 text-gray-500" />
-                    <span className="text-gray-500 text-xs">
-                      {activity.actor?.email || "Unknown"}
-                    </span>
-                  </div>
-
-                  {/* Show status badges for status changes */}
-                  {activity.activityType === "movie_status_changed" &&
-                    activity.metadata && (
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge
-                          className={`text-xs ${getStatusBadgeColor(activity.metadata.oldStatus)}`}
-                        >
-                          {activity.metadata.oldStatus}
-                        </Badge>
-                        <span className="text-gray-400 text-xs">→</span>
-                        <Badge
-                          className={`text-xs ${getStatusBadgeColor(activity.metadata.newStatus)}`}
-                        >
-                          {activity.metadata.newStatus}
-                        </Badge>
-                      </div>
+    <>
+      <Card className="bg-[#1a1d23] border-gray-700">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-white flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Recent Activity
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="text-white"
+                  disabled={isPending}
+                >
+                  <Trash2
+                    className={`h-4 w-4 ${isPending ? "animate-pulse" : ""}`}
+                  />
+                  Delete All
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-[#1a1d23] border-gray-700 text-white">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-white">
+                    Delete Movie
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-300">
+                    Are you sure you want to delete all activities logs? This
+                    action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel
+                    disabled={isDeleting}
+                    className="border-gray-600 text-white hover:bg-gray-700 bg-transparent"
+                  >
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="bg-red-600 hover:bg-red-700 text-white flex items-center justify-center"
+                  >
+                    {isDeleting ? (
+                      <>
+                        <Loader2 className="shrink-0 size-4 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      "Delete"
                     )}
-                </div>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
-                {/* Movie poster thumbnail */}
-                {activity.metadata?.posterUrl && (
-                  <div className="flex-shrink-0">
-                    <Image
-                      src={activity.metadata.posterUrl}
-                      alt="Movie poster"
-                      width={32}
-                      height={48}
-                      className="w-8 h-12 object-cover rounded border border-gray-600"
-                    />
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-gray-600 text-white hover:bg-gray-700 bg-transparent"
+              disabled={isPending}
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isPending ? "animate-spin" : ""}`}
+              />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isPending ? (
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 p-3 rounded-lg bg-gray-800/30 animate-pulse"
+                >
+                  <div className="w-12 h-16 bg-gray-700 rounded"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-700 rounded w-1/2"></div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-300 mb-2">
-              No recent activity
-            </h3>
-            <p className="text-gray-500 text-sm">
-              Recent admin actions will appear here
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                  <div className="h-6 w-16 bg-gray-700 rounded"></div>
+                </div>
+              ))}
+            </div>
+          ) : activities && activities.length > 0 ? (
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {activities.map((activity) => (
+                <div
+                  key={activity._id}
+                  className="flex items-start gap-4 p-3 rounded-lg bg-gray-800/30 hover:bg-gray-800/50 transition-colors"
+                >
+                  <div className="flex-shrink-0 mt-1">
+                    {getActivityIcon(activity.activityType)}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-white text-sm font-medium leading-relaxed">
+                        {getActivityMessage(activity)}
+                      </p>
+                      <span className="text-gray-400 text-xs whitespace-nowrap">
+                        {formatTimeAgo(activity.createdAt)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-2">
+                      <User className="h-3 w-3 text-gray-500" />
+                      <span className="text-gray-500 text-xs">
+                        {activity.actor?.email || "Unknown"}
+                      </span>
+                    </div>
+
+                    {/* Show status badges for status changes */}
+                    {activity.activityType === "movie_status_changed" &&
+                      activity.metadata && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge
+                            className={`text-xs ${getStatusBadgeColor(activity.metadata.oldStatus)}`}
+                          >
+                            {activity.metadata.oldStatus}
+                          </Badge>
+                          <span className="text-gray-400 text-xs">→</span>
+                          <Badge
+                            className={`text-xs ${getStatusBadgeColor(activity.metadata.newStatus)}`}
+                          >
+                            {activity.metadata.newStatus}
+                          </Badge>
+                        </div>
+                      )}
+                  </div>
+
+                  {/* Movie poster thumbnail */}
+                  {activity.metadata?.posterUrl && (
+                    <div className="flex-shrink-0">
+                      <Image
+                        src={activity.metadata.posterUrl}
+                        alt="Movie poster"
+                        width={32}
+                        height={48}
+                        className="w-8 h-12 object-cover rounded border border-gray-600"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-300 mb-2">
+                No recent activity
+              </h3>
+              <p className="text-gray-500 text-sm">
+                Recent admin actions will appear here
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 };
 
