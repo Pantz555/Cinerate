@@ -28,12 +28,16 @@ import {
 } from "lucide-react";
 import { useQuery } from "convex-helpers/react";
 import { api } from "@/convex/_generated/api";
-import { useAction, usePaginatedQuery } from "convex/react";
+import { useAction, useMutation, usePaginatedQuery } from "convex/react";
 import { useDebouncedValue } from "@mantine/hooks";
 import { StructuredMovies } from "@/lib/types";
 import MovieCard from "@/components/movie-card";
+import { Doc, Id } from "@/convex/_generated/dataModel";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function DiscoverPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
@@ -50,7 +54,24 @@ export default function DiscoverPage() {
   const [searchedMovies, setSearchedMovies] = useState<StructuredMovies | []>(
     [],
   );
+
+  // Get current user
+  const { data: user } = useQuery(api.auth.loggedInUser);
+  const currentUserId = user?._id;
+
   const [isSearching, setIsSearching] = useState(false);
+
+  const { data: listsContainingMovie } = useQuery(
+    api.lists.isMovieInLists,
+    data
+      ? {
+          movieId: data[0]?._id as Id<"movies">,
+        }
+      : "skip",
+  );
+
+  const [isAddingToWatchlist, setIsAddingToWatchlist] = useState(false);
+  const addToWatchlistMutation = useMutation(api.lists.addToWatchlist);
 
   // Get personalized picks based on user ratings
   const { results: personalizedPicks, status: personalizedStatus } =
@@ -87,18 +108,19 @@ export default function DiscoverPage() {
       setSearchedMovies([]);
       setIsSearching(false);
     }
-  }, [debounced, searchMovie]);
-
-  const { data: filteredMovies, isPending: filteredMoviesLoading } = useQuery(
-    api.movies.getMoviesWithFilters,
-    {
-      genre: selectedGenre || undefined,
-      year: selectedYear || undefined,
-      minRating: selectedRating
-        ? parseFloat(selectedRating.replace("+", ""))
-        : undefined,
-    },
-  );
+  }, [debounced, searchMovie, selectedGenre]);
+  const { results: filteredMovies, status: paginationStatus } =
+    usePaginatedQuery(
+      api.movies.getMoviesWithFiltersPaginated,
+      {
+        genre: selectedGenre || undefined,
+        year: selectedYear || undefined,
+        minRating: selectedRating
+          ? parseFloat(selectedRating.replace("+", ""))
+          : undefined,
+      },
+      { initialNumItems: 12 },
+    );
 
   const currentMovies = debounced.trim()
     ? searchedMovies
@@ -162,6 +184,51 @@ export default function DiscoverPage() {
     </div>
   );
 
+  const isMovieAdded = listsContainingMovie && listsContainingMovie.length > 0;
+  const watchlistButtonText = isMovieAdded
+    ? `Added (${listsContainingMovie[0].name})`
+    : isAddingToWatchlist
+      ? "Adding..."
+      : "Add to Watchlist";
+  const watchlistButtonDisabled = isAddingToWatchlist || isMovieAdded;
+
+  const handleAddToWatchlist = async (movie: Doc<"movies">) => {
+    if (!currentUserId) {
+      toast.error("Please log in to add to your watchlist.");
+      router.push("/login");
+      return;
+    }
+
+    if (isMovieAdded) {
+      toast.info(
+        `Movie is already in your ${listsContainingMovie[0].name} list!`,
+      );
+      return;
+    }
+
+    setIsAddingToWatchlist(true);
+    try {
+      const result = await addToWatchlistMutation({
+        movieId: movie._id as Id<"movies">,
+      });
+
+      if (result.status === "added") {
+        toast.success(`'${movie?.title}' added to your ${result.listName}!`);
+      }
+      // The Convex query automatically refetches, updating the button text
+    } catch (e: any) {
+      const errorMessage = e.message || "Failed to add to watchlist.";
+      toast.error(
+        errorMessage.includes("Not authenticated")
+          ? "Please log in."
+          : errorMessage,
+      );
+      console.error("Watchlist error:", e);
+    } finally {
+      setIsAddingToWatchlist(false);
+    }
+  };
+
   const personalizationLoading =
     personalizedStatus === "LoadingFirstPage" && personalizedPicks.length === 0;
 
@@ -217,10 +284,12 @@ export default function DiscoverPage() {
                     </Link>
                     <Button
                       variant="outline"
+                      onClick={() => handleAddToWatchlist(featuredMovie)}
+                      disabled={watchlistButtonDisabled}
                       className="border-gray-600 text-gray-300 hover:bg-gray-800 px-6 py-3 bg-transparent hover:text-gray-300"
                     >
                       <Heart className="mr-2 h-5 w-5" />
-                      Add to Watchlist
+                      {watchlistButtonText}
                     </Button>
                   </div>
                 </div>

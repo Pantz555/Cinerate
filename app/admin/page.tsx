@@ -449,7 +449,7 @@ export default function AdminPage() {
                             ...movieForm,
                             genres: e.target.value
                               .split(",")
-                              .map((g: any) => g.trim())
+                              .map((g: string) => g.trim().toLocaleLowerCase())
                               .filter((g: any) => g), // Convert to array
                           })
                         }
@@ -989,7 +989,9 @@ export default function AdminPage() {
                                             ...movieForm,
                                             genres: e.target.value
                                               .split(",")
-                                              .map((g: any) => g.trim())
+                                              .map((g: any) =>
+                                                g.trim().toLocaleLowerCase(),
+                                              )
                                               .filter((g: any) => g),
                                           })
                                         }
@@ -1345,12 +1347,7 @@ export default function AdminPage() {
               {/* Load More Button */}
               {paginationStatus === "CanLoadMore" && (
                 <div className="flex justify-center mt-10">
-                  <Button
-                    onClick={() => loadMore(4)}
-                 
-                  >
-                    Load More Movies
-                  </Button>
+                  <Button onClick={() => loadMore(4)}>Load More Movies</Button>
                 </div>
               )}
 

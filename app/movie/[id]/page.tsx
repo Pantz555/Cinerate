@@ -34,6 +34,13 @@ export default function MovieDetailsPage({
     cursor: null as string | null,
   });
 
+  const { data: listsContainingMovie } = useQuery(api.lists.isMovieInLists, {
+    movieId: id as Id<"movies">,
+  });
+
+  const [isAddingToWatchlist, setIsAddingToWatchlist] = useState(false);
+  const addToWatchlistMutation = useMutation(api.lists.addToWatchlist);
+
   // view stats
   const hasViewed = useQuery(api.viewTracking.hasUserViewedMovie, {
     movieId: id,
@@ -106,6 +113,51 @@ export default function MovieDetailsPage({
           ? review.likesCount + 1
           : review.likesCount - 1;
       }
+    }
+  };
+
+  const isMovieAdded = listsContainingMovie && listsContainingMovie.length > 0;
+  const watchlistButtonText = isMovieAdded
+    ? `Added (${listsContainingMovie[0].name})`
+    : isAddingToWatchlist
+      ? "Adding..."
+      : "Add to Watchlist";
+  const watchlistButtonDisabled = isAddingToWatchlist || isMovieAdded;
+
+  const handleAddToWatchlist = async () => {
+    if (!currentUserId) {
+      toast.error("Please log in to add to your watchlist.");
+      router.push("/auth");
+      return;
+    }
+
+    if (isMovieAdded) {
+      toast.info(
+        `Movie is already in your ${listsContainingMovie[0].name} list!`,
+      );
+      return;
+    }
+
+    setIsAddingToWatchlist(true);
+    try {
+      const result = await addToWatchlistMutation({
+        movieId: id as Id<"movies">,
+      });
+
+      if (result.status === "added") {
+        toast.success(`'${movie?.title}' added to your ${result.listName}!`);
+      }
+      // The Convex query automatically refetches, updating the button text
+    } catch (e: any) {
+      const errorMessage = e.message || "Failed to add to watchlist.";
+      toast.error(
+        errorMessage.includes("Not authenticated")
+          ? "Please log in."
+          : errorMessage,
+      );
+      console.error("Watchlist error:", e);
+    } finally {
+      setIsAddingToWatchlist(false);
     }
   };
 
@@ -203,8 +255,17 @@ export default function MovieDetailsPage({
                     <Star className="h-5 w-5" /> Rate Now
                   </Button>
                 </Link>
-                <Button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#292d38] text-white font-semibold rounded-md hover:bg-white/10 transition-all text-base">
-                  <BookmarkPlus className="h-5 w-5" /> Add to Watchlist
+                <Button
+                  onClick={handleAddToWatchlist}
+                  disabled={watchlistButtonDisabled}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white font-semibold rounded-md transition-all text-base ${
+                    isMovieAdded
+                      ? "bg-green-600 hover:bg-green-700 cursor-default"
+                      : "bg-[#292d38] hover:bg-white/10"
+                  }`}
+                >
+                  <BookmarkPlus className="h-5 w-5" />
+                  {watchlistButtonText}
                 </Button>
               </div>
             </div>
@@ -225,7 +286,7 @@ export default function MovieDetailsPage({
                 <h1 className="text-white text-4xl md:text-5xl font-extrabold tracking-tight">
                   {movie.title}
                 </h1>
-                <p className="text-white/80 text-base">
+                <p className="text-white/80 text-base capitalize">
                   {movie?.genres?.join(", ")}
                 </p>
                 <p className="text-[#9ea4b7] max-w-3xl mt-2 text-base leading-relaxed">

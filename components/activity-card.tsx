@@ -142,7 +142,7 @@ const RecentActivityCard = () => {
             Recent Activity
           </CardTitle>
           <div className="flex items-center gap-2">
-            <AlertDialog>
+            {activities?.length > 0 && <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
                   size="sm"
@@ -189,7 +189,7 @@ const RecentActivityCard = () => {
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog>}
 
             <Button
               size="sm"

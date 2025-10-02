@@ -9,26 +9,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import {
   Brain,
   Target,
-  Settings,
   Star,
   Heart,
   Eye,
   Clock,
   Zap,
-  Bell,
-  Palette,
-  BarChart3,
   Loader2,
   RefreshCw,
-  ArrowLeft
+  ArrowLeft,
 } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -45,58 +39,31 @@ export default function PersonalizationPage() {
   // Generate new recommendations
   const generateRecs = useMutation(api.recommendations.generateRecommendations);
 
-  // Mock user data (you can fetch this from your user query)
-  const mockUser = {
-    favoriteGenres: ["Action", "Sci-Fi", "Thriller"],
-    preferredRatingRange: [3.5, 5.0] as [number, number],
-    personalityProfile: {
-      adventurous: 0.7,
-      critical: 0.3,
-      social: 0.8,
-      binge: 0.6,
-    },
-    stats: {
-      watchedMovies: 45,
-      ratedMovies: 32,
-      avgRating: 4.7,
-    },
-  };
-
-  const [preferences, setPreferences] = useState(mockUser);
-  const [uiSettings, setUISettings] = useState({
-    compactMode: false,
-    showRatings: true,
-    autoplay: false,
-    notifications: {
-      newReleases: true,
-      recommendations: true,
-      communityActivity: false,
-      weeklyDigest: true,
-    },
-  });
+  // Fetch user stats (includes personality and favorite genres)
+  const userStats = useQuery(api.profile.getUserStats, {});
 
   const personalityTraits = [
     {
       name: "Adventurous",
-      value: preferences.personalityProfile.adventurous,
+      value: userStats?.personalityProfile?.adventurous || 0,
       description: "Willingness to explore new genres",
       icon: <Zap className="w-4 h-4" />,
     },
     {
       name: "Critical",
-      value: preferences.personalityProfile.critical,
+      value: userStats?.personalityProfile?.critical || 0,
       description: "Tendency to rate movies harshly",
       icon: <Target className="w-4 h-4" />,
     },
     {
       name: "Social",
-      value: preferences.personalityProfile.social,
+      value: userStats?.personalityProfile?.social || 0,
       description: "Engagement with community features",
       icon: <Heart className="w-4 h-4" />,
     },
     {
       name: "Binge Watcher",
-      value: preferences.personalityProfile.binge,
+      value: userStats?.personalityProfile?.binge || 0,
       description: "Tendency to watch multiple movies",
       icon: <Eye className="w-4 h-4" />,
     },
@@ -111,13 +78,6 @@ export default function PersonalizationPage() {
     } finally {
       setIsRefreshing(false);
     }
-  };
-
-  const updateRatingRange = (newRange: number[]) => {
-    setPreferences((prev) => ({
-      ...prev,
-      preferredRatingRange: [newRange[0], newRange[1]] as [number, number],
-    }));
   };
 
   const getAlgorithmColor = (algorithm: string) => {
@@ -149,14 +109,15 @@ export default function PersonalizationPage() {
         return "Recommended";
     }
   };
+
   return (
     <div className="min-h-screen bg-black text-white p-4 pb-20">
-         <Button variant="ghost" className="text-gray-300 mb-6" asChild>
-            <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Link>
-          </Button>
+      <Button variant="ghost" className="text-gray-300 mb-6" asChild>
+        <Link href="/">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Home
+        </Link>
+      </Button>
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center mb-8">
@@ -171,7 +132,7 @@ export default function PersonalizationPage() {
         </div>
 
         <Tabs defaultValue="recommendations" className="space-y-6">
-          <TabsList className="bg-gray-900 border-gray-800 grid grid-cols-1 md:grid-cols-4 w-full max-w-2xl mx-auto">
+          <TabsList className="bg-gray-900 border-gray-800 grid grid-cols-1 md:grid-cols-2 w-full max-w-2xl mx-auto">
             <TabsTrigger
               value="recommendations"
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300"
@@ -183,22 +144,8 @@ export default function PersonalizationPage() {
               value="profile"
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300"
             >
-              <BarChart3 className="w-4 h-4 mr-2" />
+              <Brain className="w-4 h-4 mr-2" />
               Profile
-            </TabsTrigger>
-            <TabsTrigger
-              value="preferences"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Preferences
-            </TabsTrigger>
-            <TabsTrigger
-              value="interface"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300"
-            >
-              <Palette className="w-4 h-4 mr-2" />
-              Interface
             </TabsTrigger>
           </TabsList>
 
@@ -386,27 +333,33 @@ export default function PersonalizationPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {personalityTraits.map((trait) => (
-                    <div key={trait.name} className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-white">
-                          {trait.icon}
-                          <span className="font-medium text-white">
-                            {trait.name}
+                {!userStats ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {personalityTraits.map((trait) => (
+                      <div key={trait.name} className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-white">
+                            {trait.icon}
+                            <span className="font-medium text-white">
+                              {trait.name}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-400">
+                            {Math.round(trait.value * 100)}%
                           </span>
                         </div>
-                        <span className="text-sm text-gray-400">
-                          {Math.round(trait.value * 100)}%
-                        </span>
+                        <Progress value={trait.value * 100} className="h-2" />
+                        <p className="text-sm text-gray-400">
+                          {trait.description}
+                        </p>
                       </div>
-                      <Progress value={trait.value * 100} className="h-2" />
-                      <p className="text-sm text-gray-400">
-                        {trait.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -418,7 +371,7 @@ export default function PersonalizationPage() {
                     <Eye className="w-8 h-8 text-blue-500" />
                     <div>
                       <p className="text-2xl font-bold text-white">
-                        {preferences.stats.watchedMovies}
+                        {userStats?.viewCount || 0}
                       </p>
                       <p className="text-sm text-gray-400">Movies Watched</p>
                     </div>
@@ -432,7 +385,7 @@ export default function PersonalizationPage() {
                     <Star className="w-8 h-8 text-yellow-500" />
                     <div>
                       <p className="text-2xl font-bold text-white">
-                        {preferences.stats.ratedMovies}
+                        {userStats?.totalRatings || 0}
                       </p>
                       <p className="text-sm text-gray-400">Movies Rated</p>
                     </div>
@@ -446,7 +399,7 @@ export default function PersonalizationPage() {
                     <Clock className="w-8 h-8 text-green-500" />
                     <div>
                       <p className="text-2xl font-bold text-white">
-                        {preferences.stats.avgRating}
+                        {userStats?.avgRating || 0}
                       </p>
                       <p className="text-sm text-gray-400">Avg Rating Given</p>
                     </div>
@@ -462,274 +415,24 @@ export default function PersonalizationPage() {
                 <CardDescription>Based on your rating history</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {preferences.favoriteGenres.map((genre) => (
-                    <Badge
-                      key={genre}
-                      variant="secondary"
-                      className="bg-blue-600 text-white"
-                    >
-                      {genre}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Preferences */}
-          <TabsContent value="preferences" className="space-y-6">
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-white">Rating Preferences</CardTitle>
-                <CardDescription>
-                  Customize your movie discovery settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <label className="text-sm font-medium mb-3 block text-white">
-                    Preferred Rating Range:{" "}
-                    {preferences.preferredRatingRange[0]} -{" "}
-                    {preferences.preferredRatingRange[1]}
-                  </label>
-                  <Slider
-                    value={preferences.preferredRatingRange}
-                    onValueChange={updateRatingRange}
-                    max={5}
-                    min={1}
-                    step={0.1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>1.0</span>
-                    <span>5.0</span>
+                {!userStats?.favoriteGenres ||
+                userStats.favoriteGenres.length === 0 ? (
+                  <p className="text-gray-400 text-center py-4">
+                    Rate more movies to discover your favorite genres
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {userStats.favoriteGenres.map((genre: string) => (
+                      <Badge
+                        key={genre}
+                        variant="secondary"
+                        className="bg-blue-600 text-white"
+                      >
+                        {genre}
+                      </Badge>
+                    ))}
                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="font-medium text-white">
-                    Recommendation Settings
-                  </h3>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-white">
-                        Include Popular Movies
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        Show trending and popular films
-                      </p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-white">Discovery Mode</p>
-                      <p className="text-sm text-gray-400">
-                        Include movies outside your usual taste
-                      </p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-white">
-                        Hide Watched Movies
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        Don't show movies you've already seen
-                      </p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Notification Preferences */}
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Bell className="w-5 h-5" />
-                  Notifications
-                </CardTitle>
-                <CardDescription>
-                  Choose what updates you want to receive
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-white">New Releases</p>
-                    <p className="text-sm text-gray-400">
-                      Movies matching your taste
-                    </p>
-                  </div>
-                  <Switch
-                    checked={uiSettings.notifications.newReleases}
-                    onCheckedChange={(checked) =>
-                      setUISettings((prev) => ({
-                        ...prev,
-                        notifications: {
-                          ...prev.notifications,
-                          newReleases: checked,
-                        },
-                      }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-white">
-                      Personalized Recommendations
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Weekly curated suggestions
-                    </p>
-                  </div>
-                  <Switch
-                    checked={uiSettings.notifications.recommendations}
-                    onCheckedChange={(checked) =>
-                      setUISettings((prev) => ({
-                        ...prev,
-                        notifications: {
-                          ...prev.notifications,
-                          recommendations: checked,
-                        },
-                      }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-white">Community Activity</p>
-                    <p className="text-sm text-gray-400">
-                      Reviews and discussions
-                    </p>
-                  </div>
-                  <Switch
-                    checked={uiSettings.notifications.communityActivity}
-                    onCheckedChange={(checked) =>
-                      setUISettings((prev) => ({
-                        ...prev,
-                        notifications: {
-                          ...prev.notifications,
-                          communityActivity: checked,
-                        },
-                      }))
-                    }
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Interface Customization */}
-          <TabsContent value="interface" className="space-y-6">
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Palette className="w-5 h-5" />
-                  Interface Preferences
-                </CardTitle>
-                <CardDescription>
-                  Customize your viewing experience
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-white">Compact Mode</p>
-                      <p className="text-sm text-gray-400">
-                        Show more content in less space
-                      </p>
-                    </div>
-                    <Switch
-                      checked={uiSettings.compactMode}
-                      onCheckedChange={(checked) =>
-                        setUISettings((prev) => ({
-                          ...prev,
-                          compactMode: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-white">Show Ratings</p>
-                      <p className="text-sm text-gray-400">
-                        Display ratings on movie cards
-                      </p>
-                    </div>
-                    <Switch
-                      checked={uiSettings.showRatings}
-                      onCheckedChange={(checked) =>
-                        setUISettings((prev) => ({
-                          ...prev,
-                          showRatings: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-white">
-                        Auto-play Trailers
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        Play trailers when hovering
-                      </p>
-                    </div>
-                    <Switch
-                      checked={uiSettings.autoplay}
-                      onCheckedChange={(checked) =>
-                        setUISettings((prev) => ({
-                          ...prev,
-                          autoplay: checked,
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card className="bg-gray-900 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-white">Quick Actions</CardTitle>
-                <CardDescription>
-                  Manage your personalization data
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="w-full border-gray-600 hover:bg-gray-800 bg-transparent text-white hover:text-white"
-                >
-                  Export My Data
-                </Button>
-                <Button
-                  onClick={handleRefreshRecommendations}
-                  variant="outline"
-                  className="w-full border-gray-600 hover:bg-gray-800 hover:text-white bg-transparent text-white"
-                >
-                  Reset Recommendations
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full border-red-600 text-red-400 hover:bg-red-900/20 bg-transparent hover:text-red-300"
-                >
-                  Clear All Preferences
-                </Button>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

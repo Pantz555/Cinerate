@@ -465,72 +465,108 @@ export const getMoviesWithFiltersPaginated = query({
 
     let baseQuery;
 
-    console.log("genre", genre);
-
-    // Use the most specific index based on filters and sort
-    // This prevents loading all data into memory
     if (sortBy === "highest" && minRating !== undefined) {
-      // Use rating index when sorting by rating
       baseQuery = ctx.db
         .query("movies")
         .withIndex("by_rating", (q) => q.gte("avgRating", minRating))
         .order("desc");
     } else if (sortBy === "recent" && year) {
-      // Use year index when filtering by year
       baseQuery = ctx.db
         .query("movies")
         .withIndex("by_year", (q) => q.eq("year", year))
         .order("desc");
     } else if (sortBy === "trending") {
-      // Use trending index
       baseQuery = ctx.db
         .query("movies")
         .withIndex("by_trending", (q) => q.eq("trending", true))
         .order("desc");
-    } else if (genre) {
-      baseQuery = ctx.db
-        .query("movies")
-        .withSearchIndex("search_genres", (q) => q.search("genres", genre));
     } else {
-      // Default: scan by creation time
+      // Default: full table scan by creation time
       baseQuery = ctx.db.query("movies").order("desc");
     }
 
-    // Apply status filter (always filter to published by default)
+    // The status filter is always a safe and fast filter to apply
     baseQuery = baseQuery.filter((q) =>
       q.eq(q.field("status"), status || "published"),
     );
 
+    // Only apply remaining scalar filters if they weren't used for the index
     if (year && sortBy !== "recent") {
       baseQuery = baseQuery.filter((q) => q.eq(q.field("year"), year));
     }
-
     if (minRating !== undefined && sortBy !== "highest") {
       baseQuery = baseQuery.filter((q) =>
         q.gte(q.field("avgRating"), minRating),
       );
     }
 
-    // Paginate BEFORE sorting for complex sorts
-    // This limits the data we need to process
+    // Check if the genre filter is active
+    if (genre) {
+      // If genre is active, collect ALL results from the baseQuery first
+      const allMovies = await baseQuery.collect();
+
+      const filterGenreLower = genre.toLowerCase();
+      let moviesPage = allMovies.filter((movie) => {
+        if (!movie.genres || movie.genres.length === 0) {
+          return false;
+        }
+        return movie.genres.some(
+          (movieGenre) => movieGenre.toLowerCase() === filterGenreLower,
+        );
+      });
+
+      if (
+        sortBy === "recent" ||
+        sortBy === "highest" ||
+        sortBy === "trending"
+      ) {
+        moviesPage.sort((a, b) => b._creationTime - a._creationTime);
+      }
+
+      // Apply popularity sort in-memory (if requested)
+      if (sortBy === "popularity") {
+        moviesPage.sort(
+          (a, b) => calculatePopularityScore(b) - calculatePopularityScore(a),
+        );
+      }
+
+      // Apply pagination limit manually (since we used .collect() instead of .paginate())
+      const { numItems, cursor } = paginationOpts;
+      const startIndex = cursor
+        ? moviesPage.findIndex((m) => m._id === cursor) + 1
+        : 0;
+      const page = moviesPage.slice(startIndex, startIndex + numItems);
+      const hasNextPage = moviesPage.length > startIndex + numItems;
+
+      // Manually construct the pagination result object
+      return {
+        page,
+        continueCursor: hasNextPage ? page[page.length - 1]?._id : null,
+        isDone: !hasNextPage,
+      };
+    }
+
     const paginatedResults = await baseQuery.paginate(paginationOpts);
 
-    // For popularity sorting, we need to calculate scores
-    // But only for the paginated results, not all movies
+    // For popularity sorting, we need to calculate scores on the paginated page
     if (sortBy === "popularity") {
-      const sortedMovies = [...paginatedResults.page].sort((a, b) => {
+      const moviesPage = paginatedResults.page;
+      const sortedMovies = [...moviesPage].sort((a, b) => {
         const scoreA = calculatePopularityScore(a);
         const scoreB = calculatePopularityScore(b);
         return scoreB - scoreA;
       });
-
       return {
         ...paginatedResults,
         page: sortedMovies,
       };
     }
 
-    return paginatedResults;
+    return {
+      page: paginatedResults.page,
+      continueCursor: paginatedResults.continueCursor,
+      isDone: paginatedResults.isDone,
+    };
   },
 });
 

@@ -317,7 +317,7 @@ export default function Analytics() {
                     totalRatings: { label: "Total Ratings", color: "#3B82F6" },
                     activeUsers: { label: "Active Users", color: "#10B981" },
                   }}
-                  className="h-[250px] sm:h-[300px]"
+                  className="h-[250px] sm:h-[300px] w-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={ratingTrends}>
@@ -355,7 +355,7 @@ export default function Analytics() {
               <CardContent>
                 <ChartContainer
                   config={{ count: { label: "Ratings", color: "#3B82F6" } }}
-                  className="h-[250px] sm:h-[300px]"
+                  className="h-[250px] sm:h-[300px] w-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -445,7 +445,7 @@ export default function Analytics() {
                   config={{
                     avgRating: { label: "Average Rating", color: "#3B82F6" },
                   }}
-                  className="h-[250px] sm:h-[300px]"
+                  className="h-48 w-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={categoryBreakdown}>
@@ -486,7 +486,10 @@ export default function Analytics() {
               <CardContent>
                 <div className="space-y-4">
                   {categoryBreakdown.map((category) => (
-                    <div key={category.category} className="space-y-2 text-white">
+                    <div
+                      key={category.category}
+                      className="space-y-2 text-white"
+                    >
                       <div className="flex justify-between text-sm">
                         <span>{category.category}</span>
                         <span className="text-white">
@@ -524,7 +527,7 @@ export default function Analytics() {
                   sessions: { label: "Sessions", color: "#3B82F6" },
                   ratings: { label: "Ratings", color: "#10B981" },
                 }}
-                className="h-[300px] sm:h-[400px]"
+                className="h-[300px] sm:h-[400px] w-full"
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={userEngagement}>

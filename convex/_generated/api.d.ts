@@ -17,6 +17,7 @@ import type * as chat from "../chat.js";
 import type * as communityReviews from "../communityReviews.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
+import type * as lists from "../lists.js";
 import type * as movieComments from "../movieComments.js";
 import type * as movies from "../movies.js";
 import type * as profile from "../profile.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   communityReviews: typeof communityReviews;
   crons: typeof crons;
   http: typeof http;
+  lists: typeof lists;
   movieComments: typeof movieComments;
   movies: typeof movies;
   profile: typeof profile;
