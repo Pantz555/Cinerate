@@ -275,7 +275,7 @@ export default function DiscoverPage() {
                   <p className="text-gray-300 text-lg mb-6 leading-relaxed">
                     {featuredMovie.description}
                   </p>
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <Link href={`/movie/${featuredMovie._id}`}>
                       <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3">
                         <Star className="mr-2 h-5 w-5" />
