@@ -191,6 +191,11 @@ export const deleteMovie = mutation({
         },
       });
 
+      // delete movie embeddings
+      await ctx.scheduler.runAfter(0, api.rag.removeMovieEmbeddings, {
+        movieId: args.id,
+      });
+
       // Delete the movie
       await ctx.db.delete(args.id);
 
