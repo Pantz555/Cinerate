@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
+import { api } from "./_generated/api";
 
 // Initialize default achievements (run once)
 export const initializeDefaultAchievements = mutation({
@@ -277,26 +278,68 @@ export const recomputeAllAchievements = internalMutation({
   args: {},
   handler: async (ctx) => {
     const users = await ctx.db.query("users").collect();
+    const achievements = await ctx.db.query("achievements").collect();
 
     for (const user of users) {
-      // get all ratings by user
+      const userId = user._id;
       const ratings = await ctx.db
         .query("ratings")
-        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .withIndex("by_user", (q) => q.eq("userId", userId))
         .collect();
 
       const totalRatings = ratings.length;
       const highRatings = ratings.filter((r) => r.overallRating >= 5).length;
       const lowRatings = ratings.filter((r) => r.overallRating <= 2).length;
 
-      // apply achievement rules here
-      // e.g., award "First Steps" if totalRatings >= 1
-      // use ctx.db.insert("userAchievements", {...})
+      // Fetch user's unlocked achievements
+      const unlocked = await ctx.db
+        .query("userAchievements")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .collect();
+      const unlockedIds = unlocked.map((ua) => ua.achievementId);
 
-      // For now, just log counts (you can extend)
-      console.log(
-        `User ${user._id} => ${totalRatings} ratings, ${highRatings} high, ${lowRatings} low`,
-      );
+      // Loop through all achievements
+      for (const achievement of achievements) {
+        if (unlockedIds.includes(achievement._id)) continue; // skip if already unlocked
+
+        let meetsRequirement = false;
+
+        switch (achievement.requirement.type) {
+          case "total_ratings":
+            meetsRequirement = totalRatings >= achievement.requirement.value;
+            break;
+          case "high_ratings":
+            meetsRequirement = highRatings >= achievement.requirement.value;
+            break;
+          case "low_ratings":
+            meetsRequirement = lowRatings >= achievement.requirement.value;
+            break;
+          default:
+            continue;
+        }
+
+        if (meetsRequirement) {
+          // ✅ Add record to userAchievements
+          await ctx.db.insert("userAchievements", {
+            userId,
+            achievementId: achievement._id,
+            earnedAt: Date.now(),
+          });
+
+          // ✅ Trigger notification helper
+          await ctx.runMutation(
+            api.notificationHelpers.notifyAchievementUnlocked,
+            {
+              userId,
+              achievementId: achievement._id,
+            },
+          );
+
+          console.log(
+            `User ${userId} unlocked achievement: ${achievement.title}`,
+          );
+        }
+      }
     }
   },
 });

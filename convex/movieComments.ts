@@ -2,6 +2,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
+import { api } from "./_generated/api";
 
 export const getMovieComments = query({
   args: {
@@ -85,6 +86,12 @@ export const addMovieComment = mutation({
       await ctx.db.patch(args.parentCommentId, {
         repliesCount: (parentComment.repliesCount || 0) + 1,
         updatedAt: Date.now(),
+      });
+
+      await ctx.runMutation(api.notificationHelpers.notifyCommentReply, {
+        commentId: args.parentCommentId,
+        replierId: userId,
+        replyContent: args.content,
       });
     }
 

@@ -137,6 +137,25 @@ export const updateMovie = mutation({
         }),
       );
 
+      // if (
+      //   args.description &&
+      //   args.title &&
+      //   args.cast &&
+      //   args.genres &&
+      //   args.year &&
+      //   args.id
+      // ) {
+      //   await ctx.scheduler.runAfter(0, api.rag.addMovieEmbeddings, {
+      //     content: args.description,
+      //     title: args.title,
+      //     movieId: args.id,
+      //     posterUrl: posterUrl || undefined,
+      //     cast: args.cast,
+      //     genre: args.genres.join(" "),
+      //     year: args.year,
+      //   });
+      // }
+
       // Track activity
       await ctx.scheduler.runAfter(0, api.activities.createActivity, {
         userId,
@@ -192,9 +211,9 @@ export const deleteMovie = mutation({
       });
 
       // delete movie embeddings
-      await ctx.scheduler.runAfter(0, api.rag.removeMovieEmbeddings, {
-        movieId: args.id,
-      });
+      // await ctx.scheduler.runAfter(0, api.rag.removeMovieEmbeddings, {
+      //   movieId: args.id,
+      // });
 
       // Delete the movie
       await ctx.db.delete(args.id);

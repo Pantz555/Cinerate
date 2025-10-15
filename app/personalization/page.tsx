@@ -111,8 +111,8 @@ export default function PersonalizationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 pb-20">
-      <Button variant="ghost" className="text-gray-300 mb-6" asChild>
+    <div className="min-h-screen bg-background text-foreground p-4 pb-20">
+      <Button variant="ghost" className="text-muted-foreground mb-6" asChild>
         <Link href="/">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
@@ -125,24 +125,24 @@ export default function PersonalizationPage() {
             <Brain className="w-8 h-8 text-blue-500" />
             <h1 className="text-3xl font-bold">Personalization Hub</h1>
           </div>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto">
             Your AI-powered movie discovery engine learns from your preferences
             to deliver perfect recommendations
           </p>
         </div>
 
         <Tabs defaultValue="recommendations" className="space-y-6">
-          <TabsList className="bg-gray-900 border-gray-800 grid grid-cols-1 md:grid-cols-2 w-full max-w-2xl mx-auto">
+          <TabsList className="dark:bg-gray-900 dark:border-gray-800 grid grid-cols-1 md:grid-cols-2 w-full max-w-2xl mx-auto">
             <TabsTrigger
               value="recommendations"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-muted-foreground"
             >
               <Target className="w-4 h-4 mr-2" />
               Recommendations
             </TabsTrigger>
             <TabsTrigger
               value="profile"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-muted-foreground"
             >
               <Brain className="w-4 h-4 mr-2" />
               Profile
@@ -151,11 +151,11 @@ export default function PersonalizationPage() {
 
           {/* AI Recommendations */}
           <TabsContent value="recommendations" className="space-y-6">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white flex items-center gap-2">
+                    <CardTitle className="text-foreground flex items-center gap-2">
                       <Brain className="w-5 h-5 text-blue-500" />
                       AI-Powered Recommendations
                     </CardTitle>
@@ -186,8 +186,10 @@ export default function PersonalizationPage() {
               <CardContent>
                 {!recommendations ? (
                   <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                    <Brain className="w-16 h-16 text-gray-600" />
-                    <p className="text-gray-400">Loading recommendations...</p>
+                    <Brain className="w-16 h-16 text-foreground" />
+                    <p className="text-muted-foreground">
+                      Loading recommendations...
+                    </p>
                     <Button
                       onClick={handleRefreshRecommendations}
                       className="bg-blue-600 hover:bg-blue-700"
@@ -197,8 +199,8 @@ export default function PersonalizationPage() {
                   </div>
                 ) : recommendations.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                    <Target className="w-16 h-16 text-gray-600" />
-                    <p className="text-gray-400">
+                    <Target className="w-16 h-16 text-foreground" />
+                    <p className="text-muted-foreground">
                       No recommendations yet. Rate some movies to get started!
                     </p>
                   </div>
@@ -207,9 +209,9 @@ export default function PersonalizationPage() {
                     {recommendations.map((movie: any) => (
                       <div
                         key={movie._id}
-                        className="bg-gray-800 rounded-lg p-4 space-y-3"
+                        className="bg-card dark:bg-gray-800 rounded-lg p-4 space-y-3"
                       >
-                        <div className="aspect-[2/3] rounded-lg overflow-hidden bg-gray-700">
+                        <div className="aspect-[2/3] rounded-lg overflow-hidden bg-card/90 dark:bg-gray-700">
                           {movie.posterUrl ? (
                             <img
                               src={movie.posterUrl}
@@ -218,18 +220,20 @@ export default function PersonalizationPage() {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <span className="text-gray-500">No Image</span>
+                              <span className="text-muted-foreground">
+                                No Image
+                              </span>
                             </div>
                           )}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-white truncate">
+                          <h3 className="font-semibold text-foreground truncate">
                             {movie.title}
                           </h3>
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center gap-1">
                               <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                              <span className="text-sm text-gray-300">
+                              <span className="text-sm text-muted-foreground">
                                 {movie.avgRating?.toFixed(1) || "N/A"}
                               </span>
                             </div>
@@ -248,12 +252,12 @@ export default function PersonalizationPage() {
                           <div className="mt-2">
                             <Badge
                               variant="outline"
-                              className="text-xs text-gray-300 border-gray-600"
+                              className="text-xs text-muted-foreground border-border dark:border-gray-600"
                             >
                               {getAlgorithmLabel(movie.recommendationAlgorithm)}
                             </Badge>
                           </div>
-                          <p className="text-xs text-gray-400 mt-2">
+                          <p className="text-xs text-muted-foreground mt-2">
                             •{" "}
                             {movie.recommendationReason ||
                               "Recommended for you"}
@@ -263,14 +267,14 @@ export default function PersonalizationPage() {
                               {movie.genres.slice(0, 2).map((genre: string) => (
                                 <span
                                   key={genre}
-                                  className="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded"
+                                  className="text-xs text-muted-foreground bg-card/90 dark:bg-gray-700 px-2 py-1 rounded"
                                 >
                                   {genre}
                                 </span>
                               ))}
                             </div>
                           )}
-                          <Button className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white">
+                          <Button className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-foreground">
                             <Link
                               className="w-full flex items-center justify-center gap-2"
                               href={`/movie/${movie._id}`}
@@ -289,15 +293,15 @@ export default function PersonalizationPage() {
 
             {/* Recommendation Categories */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="bg-gray-900 border-gray-800">
+              <Card className="dark:bg-gray-900 dark:border-gray-800">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
                       <Heart className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="font-semibold text-white">Community</p>
-                      <p className="text-sm text-gray-400">
+                      <p className="font-semibold text-foreground">Community</p>
+                      <p className="text-sm text-muted-foreground">
                         Similar users loved
                       </p>
                     </div>
@@ -305,15 +309,17 @@ export default function PersonalizationPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gray-800 border-gray-800">
+              <Card className="bg-card dark:bg-gray-800 dark:border-gray-800">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
                       <Zap className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="font-semibold text-white">Discovery</p>
-                      <p className="text-sm text-gray-400">Expand your taste</p>
+                      <p className="font-semibold text-foreground">Discovery</p>
+                      <p className="text-sm text-muted-foreground">
+                        Expand your taste
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -323,9 +329,9 @@ export default function PersonalizationPage() {
 
           {/* Personality Profile */}
           <TabsContent value="profile" className="space-y-6">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-white">
+                <CardTitle className="text-foreground">
                   Your Movie Personality
                 </CardTitle>
                 <CardDescription>
@@ -335,25 +341,25 @@ export default function PersonalizationPage() {
               <CardContent>
                 {!userStats ? (
                   <div className="flex items-center justify-center py-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {personalityTraits.map((trait) => (
                       <div key={trait.name} className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-white">
+                          <div className="flex items-center gap-2 text-foreground">
                             {trait.icon}
-                            <span className="font-medium text-white">
+                            <span className="font-medium text-foreground">
                               {trait.name}
                             </span>
                           </div>
-                          <span className="text-sm text-gray-400">
+                          <span className="text-sm text-muted-foreground">
                             {Math.round(trait.value * 100)}%
                           </span>
                         </div>
                         <Progress value={trait.value * 100} className="h-2" />
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           {trait.description}
                         </p>
                       </div>
@@ -365,43 +371,49 @@ export default function PersonalizationPage() {
 
             {/* Viewing Statistics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="bg-gray-900 border-gray-800">
+              <Card className="dark:bg-gray-900 dark:border-gray-800">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <Eye className="w-8 h-8 text-blue-500" />
                     <div>
-                      <p className="text-2xl font-bold text-white">
+                      <p className="text-2xl font-bold text-foreground">
                         {userStats?.viewCount || 0}
                       </p>
-                      <p className="text-sm text-gray-400">Movies Watched</p>
+                      <p className="text-sm text-muted-foreground">
+                        Movies Watched
+                      </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gray-900 border-gray-800">
+              <Card className="dark:bg-gray-900 dark:border-gray-800">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <Star className="w-8 h-8 text-yellow-500" />
                     <div>
-                      <p className="text-2xl font-bold text-white">
+                      <p className="text-2xl font-bold text-foreground">
                         {userStats?.totalRatings || 0}
                       </p>
-                      <p className="text-sm text-gray-400">Movies Rated</p>
+                      <p className="text-sm text-muted-foreground">
+                        Movies Rated
+                      </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gray-900 border-gray-800">
+              <Card className="dark:bg-gray-900 dark:border-gray-800">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <Clock className="w-8 h-8 text-green-500" />
                     <div>
-                      <p className="text-2xl font-bold text-white">
+                      <p className="text-2xl font-bold text-foreground">
                         {userStats?.avgRating || 0}
                       </p>
-                      <p className="text-sm text-gray-400">Avg Rating Given</p>
+                      <p className="text-sm text-muted-foreground">
+                        Avg Rating Given
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -409,15 +421,17 @@ export default function PersonalizationPage() {
             </div>
 
             {/* Favorite Genres */}
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-white">Favorite Genres</CardTitle>
+                <CardTitle className="text-foreground">
+                  Favorite Genres
+                </CardTitle>
                 <CardDescription>Based on your rating history</CardDescription>
               </CardHeader>
               <CardContent>
                 {!userStats?.favoriteGenres ||
                 userStats.favoriteGenres.length === 0 ? (
-                  <p className="text-gray-400 text-center py-4">
+                  <p className="text-muted-foreground text-center py-4">
                     Rate more movies to discover your favorite genres
                   </p>
                 ) : (

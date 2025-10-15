@@ -8,6 +8,7 @@ import { StarRating } from "./star-rating";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import { Textarea } from "./ui/textarea";
+import { Input } from "./ui/input";
 
 type Props = {
   id: Id<"movies">;
@@ -91,15 +92,15 @@ const EditModal = ({ id, setEditModalOpen }: Props) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-      <div className="bg-slate-800 rounded-lg p-6 w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
+      <div className="bg-card dark:bg-slate-800 rounded-lg p-6 w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-white text-xl font-bold">Edit Rating</h3>
+          <h3 className="text-foreground text-xl font-bold">Edit Rating</h3>
           <Button
             variant="ghost"
             size="sm"
             onClick={closeEditModal}
             disabled={submitting}
-            className="text-gray-400 hover:text-black p-2"
+            className="text-muted-foreground hover:text-foreground p-2"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -114,13 +115,15 @@ const EditModal = ({ id, setEditModalOpen }: Props) => {
               }}
             />
             <div className="flex-1">
-              <h4 className="text-white font-semibold text-lg mb-1">
+              <h4 className="text-foreground font-semibold text-lg mb-1">
                 {movie?.title}
               </h4>
-              <p className="text-sm text-slate-400 mb-3">{movie?.genre}</p>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-muted-foreground mb-3">
+                {movie?.genre}
+              </p>
+              <p className="text-sm text-muted-foreground">
                 Current Average:{" "}
-                <span className="text-white font-medium">
+                <span className="text-foreground font-medium">
                   {movie?.avgRating?.toFixed(1) || "N/A"}★
                 </span>
               </p>
@@ -129,7 +132,7 @@ const EditModal = ({ id, setEditModalOpen }: Props) => {
         )}
 
         <div className="mb-6">
-          <p className="text-white font-medium mb-4">Rate Each Category</p>
+          <p className="text-foreground font-medium mb-4">Rate Each Category</p>
           <div className="mt-6 space-y-6">
             <StarRating
               name="acting"
@@ -176,11 +179,11 @@ const EditModal = ({ id, setEditModalOpen }: Props) => {
         <div className="mt-8 space-y-3">
           <label
             htmlFor="review"
-            className="block text-lg font-semibold text-white"
+            className="block text-lg font-semibold text-foreground"
           >
             Write Your Review
           </label>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Share your thoughts about the movie
           </p>
           <Textarea
@@ -188,20 +191,23 @@ const EditModal = ({ id, setEditModalOpen }: Props) => {
             placeholder="What did you think about this movie? Share your thoughts, favorite scenes, or what made it memorable..."
             value={review}
             onChange={(e) => handleReviewChange(e.target.value)}
-            className="min-h-[120px] resize-none border-[#3d4252] bg-[#0f1117] text-white placeholder:text-gray-500 focus:border-[var(--primary-500)] focus:ring-[var(--primary-500)]"
+            className="min-h-[120px] resize-none dark:border-[#3d4252] dark:bg-[#0f1117] text-foreground dark:placeholder:text-gray-500 focus:border-[var(--primary-500)] focus:ring-[var(--primary-500)]"
             maxLength={1000}
           />
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <input
+              <Input
                 type="checkbox"
                 id="public-review"
                 checked={isPublicReview}
                 onChange={(e) => setIsPublicReview(e.target.checked)}
                 disabled={!review.trim()}
-                className="rounded border-[#3d4252] bg-[#0f1117] text-blue-600"
+                className="rounded dark:border-[#3d4252] size-4 dark:bg-[#0f1117] text-blue-600"
               />
-              <label htmlFor="public-review" className="text-sm text-gray-400">
+              <label
+                htmlFor="public-review"
+                className="text-sm text-muted-foreground"
+              >
                 Make this review public (only if you write a review)
               </label>
             </div>
@@ -211,15 +217,15 @@ const EditModal = ({ id, setEditModalOpen }: Props) => {
           </div>
         </div>
 
-        <div className="mb-6 p-4 bg-slate-900 rounded-lg mt-5">
+        <div className="mb-6 p-4 bg-card dark:bg-slate-900 rounded-lg mt-5">
           <div className="flex items-center justify-between">
-            <span className="text-white font-medium">Overall Rating</span>
+            <span className="text-foreground font-medium">Overall Rating</span>
             <div className="flex items-center gap-2">
               <Star className="h-5 w-5 text-yellow-400 fill-current" />
-              <span className="text-white font-semibold">
+              <span className="text-foreground font-semibold">
                 {existingRating?.overallRating?.toFixed(1)}
               </span>
-              <span className="text-sm text-slate-400">/ 5.0</span>
+              <span className="text-sm text-muted-foreground">/ 5.0</span>
             </div>
           </div>
         </div>
@@ -228,7 +234,7 @@ const EditModal = ({ id, setEditModalOpen }: Props) => {
           <Button
             variant="outline"
             onClick={closeEditModal}
-            className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white bg-transparent"
+            className="flex-1 border-border dark:border-slate-600 text-muted-foreground dark:hover:bg-slate-700 hover:text-foreground bg-transparent"
           >
             Cancel
           </Button>

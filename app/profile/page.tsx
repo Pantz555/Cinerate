@@ -115,13 +115,13 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-900">
+    <div className="flex min-h-screen bg-background dark:bg-slate-900">
       {/* Desktop Sidebar */}
-      <aside className="w-64 flex-shrink-0 bg-slate-800 p-6 flex flex-col justify-between hidden lg:flex">
+      <aside className="w-64 flex-shrink-0 bg-background/90 dark:dark:bg-slate-800 p-6 flex flex-col justify-between hidden lg:flex">
         <div>
           <div className="flex items-center gap-3 mb-10">
             <div
-              className="size-12 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
+              className="size-12 shrink-0 rounded-full bg-gray-200 dark:bg-[#292d38] bg-cover bg-center bg-no-repeat"
               style={{
                 backgroundImage: user?.image
                   ? `url("${user.image}")`
@@ -129,16 +129,16 @@ export default function ProfilePage() {
               }}
             >
               {!user?.image && (
-                <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+                <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-foreground">
                   {user?.name?.charAt(0)?.toUpperCase() || "A"}
                 </div>
               )}
             </div>
             <div>
-              <h1 className="text-white text-lg font-semibold">
+              <h1 className="text-foreground text-lg font-semibold">
                 {user?.name || "Anonymous"}
               </h1>
-              <p className="text-sm font-normal text-slate-400">
+              <p className="text-sm font-normal text-muted-foreground">
                 @{user?.name || "Anonymous"}
               </p>
             </div>
@@ -150,6 +150,7 @@ export default function ProfilePage() {
               { name: "Lists", icon: List, href: "/lists" },
               { name: "Reviews", icon: MessageSquare, href: "/community" },
               { name: "Profile", icon: User, href: "/profile" },
+              { name: "Settings", icon: Settings, href: "/settings" },
               {
                 name: "Personalization",
                 icon: Settings,
@@ -162,7 +163,7 @@ export default function ProfilePage() {
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-md transition-colors duration-200 ${
                   item.name === "Profile"
                     ? "bg-blue-600 text-white"
-                    : "text-slate-400 hover:text-white hover:bg-slate-700"
+                    : "text-muted-foreground hover:text-foreground "
                 }`}
                 onClick={() => setActiveNav(item.name)}
               >
@@ -172,7 +173,7 @@ export default function ProfilePage() {
             ))}
             <Button
               onClick={signOut}
-              className="flex items-center gap-3 text-black"
+              className="flex items-center gap-3 text-foreground"
               variant="outline"
             >
               <LogOut />
@@ -190,7 +191,7 @@ export default function ProfilePage() {
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-slate-800 p-6 flex flex-col justify-between z-[70] transform transition-transform duration-300 lg:hidden ${
+        className={`fixed top-0 left-0 h-full w-64 bg-card dark:dark:bg-slate-800 p-6 flex flex-col justify-between z-[70] transform transition-transform duration-300 lg:hidden ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -198,7 +199,7 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div
-                className="size-12 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
+                className="size-12 shrink-0 rounded-full bg-muted dark:bg-[#292d38] bg-cover bg-center bg-no-repeat"
                 style={{
                   backgroundImage: user?.image
                     ? `url("${user?.image}")`
@@ -206,18 +207,18 @@ export default function ProfilePage() {
                 }}
               >
                 {!user?.image && (
-                  <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+                  <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-foreground">
                     {user?.name?.charAt(0)?.toUpperCase() || "A"}
                   </div>
                 )}
               </div>
 
               <div>
-                <h1 className="text-white text-lg font-semibold">
+                <h1 className="text-foreground text-lg font-semibold">
                   {" "}
                   {user?.name || "Anonymous"}
                 </h1>
-                <p className="text-sm font-normal text-slate-400">
+                <p className="text-sm font-normal text-muted-foreground">
                   @ {user?.name || "Anonymous"}
                 </p>
               </div>
@@ -226,7 +227,7 @@ export default function ProfilePage() {
               variant="ghost"
               size="sm"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-slate-400 hover:text-white p-2"
+              className="text-muted-foreground hover:text-foreground p-2"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -250,8 +251,8 @@ export default function ProfilePage() {
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-md transition-colors duration-200 ${
                   item.name === "Profile"
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-400 hover:text-white hover:bg-slate-700"
+                    ? "bg-blue-600 text-foreground"
+                    : "text-muted-foreground hover:text-foreground "
                 }`}
                 onClick={() => {
                   setActiveNav(item.name);
@@ -264,7 +265,7 @@ export default function ProfilePage() {
             ))}
             <Button
               onClick={signOut}
-              className="flex items-center gap-3 text-black"
+              className="flex items-center gap-3 text-foreground"
               variant="outline"
             >
               <LogOut />
@@ -280,36 +281,38 @@ export default function ProfilePage() {
             variant="ghost"
             size="sm"
             onClick={() => setMobileMenuOpen(true)}
-            className="text-white hover:bg-slate-700 p-2"
+            className="text-foreground  p-2"
           >
             <Menu className="h-6 w-6" />
           </Button>
-          <h1 className="text-white text-xl font-bold">Profile</h1>
+          <h1 className="text-foreground text-xl font-bold">Profile</h1>
           <div className="w-10" /> {/* Spacer for centering */}
         </div>
 
         <header className="mb-10">
-          <h1 className="text-white text-2xl lg:text-4xl font-bold tracking-tighter">
+          <h1 className="text-foreground text-2xl lg:text-4xl font-bold tracking-tighter">
             Welcome back, {user?.name || "Anonymous"}!
           </h1>
-          <p className="text-base mt-1 text-slate-400">
+          <p className="text-base mt-1 text-muted-foreground">
             Here's a look at your rating journey.
           </p>
         </header>
 
         <section className="mb-12">
-          <h2 className="text-white text-xl lg:text-2xl font-bold mb-4 tracking-tight">
+          <h2 className="text-foreground text-xl lg:text-2xl font-bold mb-4 tracking-tight">
             Quick Access
           </h2>
           <div className="grid grid-cols-1">
             <Link href="/personalization">
-              <Card className="bg-slate-800 border-transparent hover:border-blue-600 transition-colors duration-300 cursor-pointer group">
+              <Card className="dark:dark:bg-slate-800 border-transparent hover:border-blue-600 transition-colors duration-300 cursor-pointer group">
                 <CardContent className="p-4 lg:p-6">
                   <div className="flex items-center gap-3 mb-2">
                     <Settings className="h-6 w-6 text-green-400 group-hover:text-green-300" />
-                    <p className="text-white font-semibold">Personalization</p>
+                    <p className="text-foreground font-semibold">
+                      Personalization
+                    </p>
                   </div>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-muted-foreground">
                     Customize your experience and manage recommendation
                     preferences
                   </p>
@@ -321,7 +324,7 @@ export default function ProfilePage() {
 
         {/* Recently Rated Section */}
         <section className="mb-12">
-          <h2 className="text-white text-xl lg:text-2xl font-bold mb-4 tracking-tight">
+          <h2 className="text-foreground text-xl lg:text-2xl font-bold mb-4 tracking-tight">
             Recently Rated
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
@@ -349,17 +352,19 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-white font-semibold truncate text-sm lg:text-base">
+                    <Link href={`/movie/${movie._id}/rate`} className="text-foreground font-semibold truncate text-sm lg:text-base hover:text-blue-500">
                       {movie.title}
-                    </p>
-                    <p className="text-xs lg:text-sm text-slate-400">
+                    </Link>
+                    <p className="text-xs lg:text-sm text-muted-foreground">
                       {movie.genre}
                     </p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-gray-400">No rated movies at the moment</p>
+              <p className="text-muted-foreground">
+                No rated movies at the moment
+              </p>
             )}
           </div>
         </section>
@@ -369,39 +374,39 @@ export default function ProfilePage() {
           <div className="lg:col-span-2">
             {/* Your Stats */}
             <section className="mb-8">
-              <h2 className="text-white text-xl lg:text-2xl font-bold mb-4 tracking-tight">
+              <h2 className="text-foreground text-xl lg:text-2xl font-bold mb-4 tracking-tight">
                 Your Stats
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
-                <Card className="bg-slate-800 border-transparent hover:border-blue-600 transition-colors duration-300">
+                <Card className="dark:bg-slate-800 border-transparent hover:border-blue-600 transition-colors duration-300">
                   <CardContent className="p-4 lg:p-6">
-                    <p className="text-base font-medium mb-2 text-slate-400">
+                    <p className="text-base font-medium mb-2 text-muted-foreground">
                       Total Ratings
                     </p>
-                    <p className="text-white text-3xl lg:text-4xl font-bold tracking-tighter">
+                    <p className="text-foreground text-3xl lg:text-4xl font-bold tracking-tighter">
                       {userStats?.totalRatings || 0}
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="bg-slate-800 border-transparent hover:border-blue-600 transition-colors duration-300">
+                <Card className="dark:bg-slate-800 border-transparent hover:border-blue-600 transition-colors duration-300">
                   <CardContent className="p-4 lg:p-6">
-                    <p className="text-base font-medium mb-2 text-slate-400">
+                    <p className="text-base font-medium mb-2 text-muted-foreground">
                       Average Rating
                     </p>
-                    <p className="text-white text-3xl lg:text-4xl font-bold tracking-tighter flex items-center gap-2">
+                    <p className="text-foreground text-3xl lg:text-4xl font-bold tracking-tighter flex items-center gap-2">
                       {userStats?.avgRating || 0}{" "}
                       <Star className="h-6 w-6 text-yellow-400 fill-current" />
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="bg-slate-800 border-transparent hover:border-blue-600 transition-colors duration-300">
+                <Card className="dark:bg-slate-800 border-transparent hover:border-blue-600 transition-colors duration-300">
                   <CardContent className="p-4 lg:p-6">
-                    <p className="text-base font-medium mb-2 text-slate-400">
+                    <p className="text-base font-medium mb-2 text-muted-foreground">
                       Rating Streak
                     </p>
-                    <p className="text-white text-3xl lg:text-4xl font-bold tracking-tighter">
+                    <p className="text-foreground text-3xl lg:text-4xl font-bold tracking-tighter">
                       {userStats?.currentStreak || 0}{" "}
-                      <span className="text-lg font-medium text-slate-400">
+                      <span className="text-lg font-medium text-muted-foreground">
                         Days
                       </span>
                     </p>
@@ -412,12 +417,12 @@ export default function ProfilePage() {
 
             {/* Rating Patterns Chart */}
             <section className="mb-8">
-              <h2 className="text-white text-xl lg:text-2xl font-bold mb-4 tracking-tight">
+              <h2 className="text-foreground text-xl lg:text-2xl font-bold mb-4 tracking-tight">
                 Rating Distribution
               </h2>
-              <Card className="bg-slate-800 border-transparent">
+              <Card className="dark:bg-slate-800 border-transparent">
                 <CardHeader>
-                  <CardTitle className="text-white font-semibold">
+                  <CardTitle className="text-foreground font-semibold">
                     Your Rating Patterns
                   </CardTitle>
                 </CardHeader>
@@ -461,12 +466,12 @@ export default function ProfilePage() {
             {/* Rating Activity Over Time */}
             {ratingPatterns && ratingPatterns.length > 0 && (
               <section>
-                <h2 className="text-white text-xl lg:text-2xl font-bold mb-4 tracking-tight">
+                <h2 className="text-foreground text-xl lg:text-2xl font-bold mb-4 tracking-tight">
                   Rating Activity
                 </h2>
-                <Card className="bg-slate-800 border-transparent">
+                <Card className="dark:bg-slate-800 border-transparent">
                   <CardHeader>
-                    <CardTitle className="text-white font-semibold flex items-center gap-2">
+                    <CardTitle className="text-foreground font-semibold flex items-center gap-2">
                       <TrendingUp className="h-5 w-5" />
                       Monthly Activity
                     </CardTitle>
@@ -535,9 +540,9 @@ export default function ProfilePage() {
 
           {/* Achievements Sidebar */}
           <aside className="lg:col-span-1">
-            <Card className="bg-slate-800 border-transparent">
+            <Card className="dark:bg-slate-800 border-transparent">
               <CardHeader>
-                <CardTitle className="text-white text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-2">
+                <CardTitle className="text-foreground text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-2">
                   <Trophy className="h-6 w-6 text-yellow-400" />
                   Achievements
                 </CardTitle>
@@ -549,10 +554,10 @@ export default function ProfilePage() {
                       {achievement.icon}
                     </div>
                     <div>
-                      <p className="text-white font-semibold text-sm lg:text-base">
+                      <p className="text-foreground font-semibold text-sm lg:text-base">
                         {achievement.title}
                       </p>
-                      <p className="text-xs lg:text-sm text-slate-400">
+                      <p className="text-xs lg:text-sm text-muted-foreground">
                         {achievement.description}
                       </p>
                       {achievement?.earnedAt && (
@@ -567,7 +572,7 @@ export default function ProfilePage() {
 
                 {(!userAchievements || userAchievements.length === 0) && (
                   <div className="text-center py-4">
-                    <p className="text-slate-400 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       Start rating movies to unlock achievements!
                     </p>
                   </div>
@@ -578,9 +583,9 @@ export default function ProfilePage() {
             {/* Genre Distribution */}
             {userStats?.genreDistribution &&
               userStats.genreDistribution.length > 0 && (
-                <Card className="bg-slate-800 border-transparent mt-6">
+                <Card className="dark:bg-slate-800 border-transparent mt-6">
                   <CardHeader>
-                    <CardTitle className="text-white text-lg font-bold tracking-tight">
+                    <CardTitle className="text-foreground text-lg font-bold tracking-tight">
                       Favorite Genres
                     </CardTitle>
                   </CardHeader>
@@ -596,17 +601,17 @@ export default function ProfilePage() {
                             key={genre.genre}
                             className="flex items-center justify-between"
                           >
-                            <span className="text-white text-sm font-medium">
+                            <span className="text-foreground text-sm font-medium">
                               {genre.genre}
                             </span>
                             <div className="flex items-center gap-2">
-                              <div className="w-20 h-2 bg-slate-700 rounded-full overflow-hidden">
+                              <div className="w-20 h-2  bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                 <div
                                   className="h-full bg-blue-500 rounded-full"
                                   style={{ width: `${percentage}%` }}
                                 />
                               </div>
-                              <span className="text-slate-400 text-xs w-8 text-right">
+                              <span className="text-muted-foreground text-xs w-8 text-right">
                                 {genre.count}
                               </span>
                             </div>
@@ -621,7 +626,7 @@ export default function ProfilePage() {
 
         {/* Personalized Recommendations */}
         <section>
-          <h2 className="text-white text-xl lg:text-2xl font-bold mb-4 tracking-tight">
+          <h2 className="text-foreground text-xl lg:text-2xl font-bold mb-4 tracking-tight">
             Personalized Recommendations
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
@@ -637,10 +642,10 @@ export default function ProfilePage() {
                       style={{ backgroundImage: `url("${movie.posterUrl}")` }}
                     />
                     <div>
-                      <p className="text-white font-semibold truncate text-sm lg:text-base">
+                      <p className="text-foreground font-semibold truncate text-sm lg:text-base">
                         {movie.title}
                       </p>
-                      <p className="text-xs lg:text-sm text-slate-400">
+                      <p className="text-xs lg:text-sm text-muted-foreground">
                         {movie.genre}
                       </p>
                     </div>
@@ -648,7 +653,7 @@ export default function ProfilePage() {
                 </Link>
               ))
             ) : (
-              <p className="text-gray-400">
+              <p className="text-muted-foreground">
                 No personalized movies at the moment
               </p>
             )}

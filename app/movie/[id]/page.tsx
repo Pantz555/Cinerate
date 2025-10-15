@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,25 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex-helpers/react";
 import MovieDetailsSkeleton from "@/components/skeleton/movie-detatils-skeleton";
+import { useTheme } from "@/lib/theme-provider";
 
 import MovieComments from "@/components/MovieComments";
 import { useMovieView } from "@/hooks/use-movie-view";
+import { SocialShare } from "@/components/social-share";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 export default function MovieDetailsPage({
   params,
@@ -35,6 +51,10 @@ export default function MovieDetailsPage({
   });
 
   const { data: listsContainingMovie } = useQuery(api.lists.isMovieInLists, {
+    movieId: id as Id<"movies">,
+  });
+
+  const { data: categoryAverages } = useQuery(api.ratings.getCategoryAverages, {
     movieId: id as Id<"movies">,
   });
 
@@ -81,6 +101,7 @@ export default function MovieDetailsPage({
   );
 
   const likeReview = useMutation(api.communityReviews.likeReview);
+  const { theme } = useTheme();
 
   // Handle like/unlike action
   const handleLikeReview = async (
@@ -166,9 +187,45 @@ export default function MovieDetailsPage({
     return <MovieDetailsSkeleton />;
   }
 
+  const categoryRatings = categoryAverages
+    ? [
+        {
+          category: "Acting",
+          rating: categoryAverages.averages.acting,
+          fullMark: 5,
+        },
+        {
+          category: "Plot",
+          rating: categoryAverages.averages.plot,
+          fullMark: 5,
+        },
+        {
+          category: "Cinematography",
+          rating: categoryAverages.averages.cinematography,
+          fullMark: 5,
+        },
+        {
+          category: "Direction",
+          rating: categoryAverages.averages.direction,
+          fullMark: 5,
+        },
+        {
+          category: "Entertainment",
+          rating: categoryAverages.averages.entertainment,
+          fullMark: 5,
+        },
+      ]
+    : [
+        { category: "Acting", rating: 0, fullMark: 5 },
+        { category: "Plot", rating: 0, fullMark: 5 },
+        { category: "Cinematography", rating: 0, fullMark: 5 },
+        { category: "Direction", rating: 0, fullMark: 5 },
+        { category: "Entertainment", rating: 0, fullMark: 5 },
+      ];
+
   if (error) {
     return (
-      <div className="relative flex min-h-screen w-full flex-col bg-[#111317]">
+      <div className="relative flex min-h-screen w-full flex-col bg-background">
         <Header />
         <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-red-500 text-center">{error}</div>
@@ -179,7 +236,7 @@ export default function MovieDetailsPage({
 
   if (movie === null) {
     return (
-      <div className="relative flex min-h-screen w-full flex-col bg-[#111317]">
+      <div className="relative flex min-h-screen w-full flex-col dark:bg-[#111317] bg-background">
         <Header />
         <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-white text-center">Movie not found</div>
@@ -220,21 +277,23 @@ export default function MovieDetailsPage({
   };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-[#111317] transition-all duration-500 mb-10">
+    <div className="relative flex min-h-screen w-full flex-col dark:bg-[#111317] bg-background transition-all duration-500 mb-10">
       <Header />
 
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <nav className="flex items-center gap-2 text-sm">
             <Link
               href="/"
-              className="text-[#9ea4b7] hover:text-white transition-colors font-medium"
+              className="text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               Movies
             </Link>
-            <span className="text-[#575e75]">/</span>
-            <span className="text-white font-medium">{movie.title}</span>
+            <span className="text-muted-foreground">/</span>
+            <span className="text-foreground font-medium">{movie.title}</span>
           </nav>
+          {/* Social Share Button */}
+          <SocialShare title={movie.title} description={movie.description} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -251,17 +310,17 @@ export default function MovieDetailsPage({
               </div>
               <div className="mt-4 flex flex-col gap-3">
                 <Link href={`/movie/${id}/rate`}>
-                  <Button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-all text-base">
+                  <Button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground font-bold rounded-md hover:bg-primary/90 transition-all text-base">
                     <Star className="h-5 w-5" /> Rate Now
                   </Button>
                 </Link>
                 <Button
                   onClick={handleAddToWatchlist}
                   disabled={watchlistButtonDisabled}
-                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 text-white font-semibold rounded-md transition-all text-base ${
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-secondary text-secondary-foreground font-semibold rounded-md hover:bg-secondary/80 transition-all text-base ${
                     isMovieAdded
                       ? "bg-green-600 hover:bg-green-700 cursor-default"
-                      : "bg-[#292d38] hover:bg-white/10"
+                      : "bg-accent dark:bg-[#292d38] hover:bg-white/10"
                   }`}
                 >
                   <BookmarkPlus className="h-5 w-5" />
@@ -280,25 +339,25 @@ export default function MovieDetailsPage({
                     ✓ Watched
                   </span>
                 )}
-                <p className="text-white/80 text-base font-medium">
+                <p className="text-muted-foreground text-base font-medium">
                   {movie.year} • PG-13 • {movie.duration || "Unknown"}
                 </p>
-                <h1 className="text-white text-4xl md:text-5xl font-extrabold tracking-tight">
+                <h1 className="text-foreground text-4xl md:text-5xl font-extrabold tracking-tight">
                   {movie.title}
                 </h1>
-                <p className="text-white/80 text-base capitalize">
+                <p className="text-muted-foreground text-base capitalize">
                   {movie?.genres?.join(", ")}
                 </p>
-                <p className="text-[#9ea4b7] max-w-3xl mt-2 text-base leading-relaxed">
+                <p className="text-muted-foreground max-w-3xl mt-2 text-base leading-relaxed">
                   {movie.description}
                 </p>
               </div>
             </section>
 
-            <section className="p-6 bg-[#1a1d23] rounded-lg border border-[#292d38]">
+            <section className="p-6 bg-card rounded-lg border border-border">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                <div className="flex flex-col items-center justify-center gap-2 border-b md:border-b-0 md:border-r border-[#292d38] pb-6 md:pb-0 md:pr-6 text-center">
-                  <p className="text-6xl font-black leading-none text-secondary">
+                <div className="flex flex-col items-center justify-center gap-2 border-b md:border-b-0 md:border-r border-border pb-6 md:pb-0 md:pr-6 text-center">
+                  <p className="text-foreground text-6xl font-black leading-none">
                     {rating.toFixed(1)}
                   </p>
                   <div className="flex text-[#F59E0B]">
@@ -322,7 +381,7 @@ export default function MovieDetailsPage({
                         />
                       ))}
                   </div>
-                  <p className="text-white/70 text-sm font-medium">
+                  <p className="text-muted-foreground text-sm font-medium">
                     {movie?.totalRatings || 0} reviews
                   </p>
                 </div>
@@ -330,8 +389,10 @@ export default function MovieDetailsPage({
                 <div className="grid w-full flex-1 grid-cols-[20px_1fr_40px] items-center gap-x-4 gap-y-3">
                   {[5, 4, 3, 2, 1].map((star) => (
                     <div key={star} className="contents">
-                      <p className="text-white text-sm font-medium">{star}</p>
-                      <div className="flex h-1.5 flex-1 overflow-hidden rounded-full bg-[#3d4252]">
+                      <p className="text-foreground text-sm font-medium">
+                        {star}
+                      </p>
+                      <div className="flex h-1.5 flex-1 overflow-hidden rounded-full bg-muted dark:bg-[#3d4252]">
                         <div
                           className="rounded-full bg-[#F59E0B]"
                           style={{ width: `${distribution[star] || 0}%` }}
@@ -348,42 +409,180 @@ export default function MovieDetailsPage({
             </section>
 
             {/* View Stats Card */}
-            <section className="p-6 bg-[#1a1d23] rounded-lg border border-[#292d38]">
-              <h2 className="text-white text-2xl font-bold mb-6">View Stats</h2>
+            <section className="p-6 bg-background darK:bg-[#1a1d23] rounded-lg border dark:border-[#292d38]">
+              <h2 className="text-foreground text-2xl font-bold leading-tight tracking-tight mb-6">
+                View Stats
+              </h2>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <div className="flex flex-col items-center gap-2">
                   <p className="text-3xl font-extrabold text-blue-500">
                     {viewStats?.data?.totalViews || 0}
                   </p>
-                  <p className="text-white/70 text-sm">Total Views</p>
+                  <p className="text-muted-foreground text-sm">Total Views</p>
                 </div>
 
                 <div className="flex flex-col items-center gap-2">
                   <p className="text-3xl font-extrabold text-green-500">
                     {viewStats?.data?.recentViews || 0}
                   </p>
-                  <p className="text-white/70 text-sm">Recent Views</p>
+                  <p className="text-muted-foreground text-sm">Recent Views</p>
                 </div>
 
                 <div className="flex flex-col items-center gap-2">
                   <p className="text-3xl font-extrabold text-yellow-500">
                     {viewStats?.data?.uniqueViewers || 0}
                   </p>
-                  <p className="text-white/70 text-sm">Unique Viewers</p>
+                  <p className="text-muted-foreground text-sm">
+                    Unique Viewers
+                  </p>
                 </div>
 
                 <div className="flex flex-col items-center gap-2">
                   <p className="text-3xl font-extrabold text-pink-500">
                     {viewStats?.data?.totalRatings || 0}
                   </p>
-                  <p className="text-white/70 text-sm">Total Ratings</p>
+                  <p className="text-muted-foreground text-sm">Total Ratings</p>
                 </div>
               </div>
             </section>
 
+            {/* Category Breakdown Section */}
+            <section className="p-6 bg-card rounded-lg border border-border">
+              <h2 className="text-foreground text-2xl font-bold leading-tight tracking-tight mb-6">
+                Category Breakdown
+              </h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Radar Chart */}
+                <div className="flex flex-col items-center">
+                  <h3 className="text-foreground text-lg font-semibold mb-4">
+                    Overall Performance
+                  </h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <RadarChart data={categoryRatings}>
+                      <PolarGrid stroke="#99a1af " />
+                      <PolarAngleAxis
+                        dataKey="category"
+                        tick={{
+                          fill: theme === "dark" ? "#fff" : "#000",
+                          fontSize: 12,
+                        }}
+                      />
+                      <PolarRadiusAxis
+                        angle={90}
+                        domain={[0, 5]}
+                        tick={{
+                          fill: "#99a1af",
+                          fontSize: 10,
+                        }}
+                      />
+                      <Radar
+                        name="Rating"
+                        dataKey="rating"
+                        stroke="#3B82F6" // Blue stroke for visibility
+                        fill="#60A5FA" // Lighter blue fill for radar, good contrast on both themes
+                        fillOpacity={0.6}
+                      />
+                      <Tooltip
+                        cursor={false}
+                        contentStyle={{
+                          backgroundColor: theme === "dark" ? "#000" : "#fff",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "8px",
+                          color: theme === "dark" ? "#fff" : "#000",
+                        }}
+                        labelStyle={{
+                          color: theme === "dark" ? "#fff" : "#000",
+                        }}
+                        itemStyle={{ color: "#60A5FA" }}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Bar Chart */}
+                <div className="flex flex-col">
+                  <h3 className="text-foreground text-lg font-semibold mb-4">
+                    Detailed Ratings
+                  </h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={categoryRatings} layout="vertical">
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="hsl(var(--border))"
+                      />
+                      <XAxis
+                        type="number"
+                        domain={[0, 5]}
+                        tick={{ fill: theme === "dark" ? "#fff" : "#000" }}
+                      />
+                      <YAxis
+                        dataKey="category"
+                        type="category"
+                        tick={{
+                          fill: theme === "dark" ? "#fff" : "#000",
+                          fontSize: 12,
+                        }}
+                        width={120}
+                      />
+                      <Tooltip
+                        cursor={false}
+                        contentStyle={{
+                          backgroundColor: theme === "dark" ? "#000" : "#fff",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "8px",
+                        }}
+                        labelStyle={{
+                          color: theme === "dark" ? "#fff" : "#000",
+                        }}
+                        itemStyle={{ color: "#60A5FA" }}
+                      />
+                      <Bar
+                        dataKey="rating"
+                        fill="#60A5FA" // Lighter blue for bars, works on both themes
+                        radius={[0, 4, 4, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Category Details List */}
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {categoryRatings.map((item) => (
+                  <div
+                    key={item.category}
+                    className="flex items-center justify-between p-4 bg-background rounded-lg border border-border"
+                  >
+                    <span className="text-foreground font-medium">
+                      {item.category}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-5 w-5 ${
+                              i < Math.floor(item.rating)
+                                ? "fill-[#F59E0B] text-[#F59E0B]"
+                                : i < item.rating
+                                  ? "fill-[#F59E0B] text-[#F59E0B] opacity-50"
+                                  : "text-muted"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-foreground font-bold text-lg min-w-[3rem] text-right">
+                        {item.rating.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             <section>
-              <h2 className="text-white text-2xl font-bold leading-tight tracking-tight mb-4">
+              <h2 className="text-foreground text-2xl font-bold leading-tight tracking-tight mb-4">
                 Reviews
               </h2>
               <div className="flex flex-col gap-6">
@@ -393,11 +592,11 @@ export default function MovieDetailsPage({
                     return (
                       <div
                         key={review._id}
-                        className="flex flex-col gap-3 border-b border-[#292d38] pb-6"
+                        className="flex flex-col gap-3 border-b border-border pb-6"
                       >
                         <div className="flex items-center gap-3">
                           <div
-                            className="size-8 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
+                            className="size-8 shrink-0 rounded-full dark:bg-[#292d38] bg-gray-200 bg-cover bg-center bg-no-repeat"
                             style={{
                               backgroundImage: review.user.image
                                 ? `url("${review.user.image}")`
@@ -405,17 +604,17 @@ export default function MovieDetailsPage({
                             }}
                           >
                             {!review.user.image && (
-                              <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+                              <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-foreground">
                                 {review.user.name?.charAt(0)?.toUpperCase() ||
                                   "A"}
                               </div>
                             )}
                           </div>
                           <div>
-                            <p className="text-white font-semibold">
+                            <p className="text-foreground font-semibold">
                               {review.user.name || "Anonymous"}
                             </p>
-                            <p className="text-[#9ea4b7] text-xs">
+                            <p className="text-muted-foreground text-xs">
                               {timeAgo(review._creationTime)}
                             </p>
                           </div>
@@ -434,12 +633,12 @@ export default function MovieDetailsPage({
                           ))}
                         </div>
                         {/* Review text */}
-                        <p className="text-white/90 text-sm leading-relaxed">
+                        <p className="text-foreground/90 text-sm leading-relaxed">
                           {review.content}
                         </p>
                         <div className="flex gap-4 text-[#9ea4b7]">
                           <button
-                            className="flex items-center gap-2 text-sm hover:text-white transition-colors"
+                            className="flex items-center gap-2 text-sm hover:text-foreground transition-colors"
                             onClick={() =>
                               handleLikeReview(
                                 review._id,
@@ -457,7 +656,9 @@ export default function MovieDetailsPage({
                     );
                   })
                 ) : (
-                  <p className="text-white/70 text-sm">No reviews yet.</p>
+                  <p className="text-muted-foreground text-sm">
+                    No reviews yet.
+                  </p>
                 )}
 
                 <div className="flex justify-center gap-4 mt-8">

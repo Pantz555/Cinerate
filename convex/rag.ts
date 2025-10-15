@@ -1,13 +1,12 @@
 import { components } from "./_generated/api";
 import { RAG } from "@convex-dev/rag";
 import { openai } from "@ai-sdk/openai";
-import { action } from "./_generated/server";
+import { action, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 export const rag = new RAG(components.rag, {
   textEmbeddingModel: openai.embedding("text-embedding-3-small"),
   embeddingDimension: 1536, // Needs to match your embedding model
-  filterNames: ["movieId"],
 });
 
 export const addMovieEmbeddings = action({
@@ -27,12 +26,6 @@ export const addMovieEmbeddings = action({
     await rag.add(ctx, {
       namespace: "global",
       text,
-      filterValues: [
-        {
-          name: "movieId",
-          value: args.movieId,
-        },
-      ],
       metadata: {
         title: args.title,
         movieId: args.movieId,
@@ -79,26 +72,23 @@ export const searchEmbedMovie = action({
       limit: 5,
       vectorScoreThreshold: 0.2, // Only return results with a score >= 0.5
     });
-    console.log("results", results);
-    console.log("entries", entries);
-    const movieIds = entries.map((entry: any) => entry.metadata.movieId);
 
     return { results, text, entries };
   },
 });
 
-export const searchFilterMovie = action({
-  args: {
-    movieId: v.id("movies"),
-  },
-  handler: async (ctx, args) => {
-    const results = await rag.search(ctx, {
-      namespace: "global",
-      query: "",
-      filters: [{ name: "movieId", value: args.movieId }],
-      limit: 10,
-    });
+// export const searchFilterMovie = action({
+//   args: {
+//     movieId: v.id("movies"),
+//   },
+//   handler: async (ctx, args) => {
+//     const results = await rag.search(ctx, {
+//       namespace: "global",
+//       query: "",
+//       filters: [{ name: "movieId", value: args.movieId }],
+//       limit: 10,
+//     });
 
-    return results;
-  },
-});
+//     return results;
+//   },
+// });

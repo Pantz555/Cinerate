@@ -87,7 +87,7 @@ export const submitRating = mutation({
           isEdited: true,
         });
       } else {
-        await ctx.db.insert("communityReviews", {
+       const reviewId =  await ctx.db.insert("communityReviews", {
           userId: user._id,
           movieId: args.movieId,
           title: `Review for ${await getMovieTitle(ctx, args.movieId)}`,
@@ -101,6 +101,11 @@ export const submitRating = mutation({
           createdAt: Date.now(),
           updatedAt: Date.now(),
         });
+
+           await ctx.runMutation(api.notificationHelpers.notifyReviewLiked, {
+        likerId: userId,
+        reviewId: reviewId,
+      });
       }
     }
 
@@ -154,32 +159,48 @@ export const getUserRating = query({
   },
 });
 
-// Helper functions
-async function getMovieTitle(ctx: any, movieId: string) {
-  const movie = await ctx.db.get(movieId);
-  return movie?.title || "Unknown Movie";
-}
+export const getCategoryAverages = query({
+  args: { movieId: v.id("movies") },
+  handler: async (ctx, args) => {
+    const ratings = await ctx.db
+      .query("ratings")
+      .withIndex("by_movie", (q) => q.eq("movieId", args.movieId))
+      .collect();
 
-async function updateMovieRating(ctx: any, movieId: string) {
-  const ratings = await ctx.db
-    .query("ratings")
-    .withIndex("by_movie", (q: any) => q.eq("movieId", movieId))
-    .collect();
+    if (ratings.length === 0) return null;
 
-  if (ratings.length === 0) return;
+    // Initialize category sums
+    const sums = {
+      acting: 0,
+      plot: 0,
+      cinematography: 0,
+      direction: 0,
+      entertainment: 0,
+    };
 
-  const avgRating =
-    ratings.reduce((sum: any, r: any) => sum + r.overallRating, 0) /
-    ratings.length;
+    ratings.forEach((r) => {
+      sums.acting += r.ratings.acting;
+      sums.plot += r.ratings.plot;
+      sums.cinematography += r.ratings.cinematography;
+      sums.direction += r.ratings.direction;
+      sums.entertainment += r.ratings.entertainment;
+    });
 
-  await ctx.db.patch(movieId, {
-    avgRating: Math.round(avgRating * 10) / 10, // Round to 1 decimal
-    totalRatings: ratings.length,
-    reviews: ratings.filter((r: any) => r.review && r.review.trim().length > 0)
-      .length,
-    updatedAt: Date.now(),
-  });
-}
+    const count = ratings.length;
+    const averages = {
+      acting: parseFloat((sums.acting / count).toFixed(1)),
+      plot: parseFloat((sums.plot / count).toFixed(1)),
+      cinematography: parseFloat((sums.cinematography / count).toFixed(1)),
+      direction: parseFloat((sums.direction / count).toFixed(1)),
+      entertainment: parseFloat((sums.entertainment / count).toFixed(1)),
+    };
+
+    return {
+      averages,
+      totalRatings: count,
+    };
+  },
+});
 
 export const getRatingDistribution = query({
   args: { movieId: v.id("movies") },
@@ -214,6 +235,33 @@ export const getRatingDistribution = query({
     return { distribution, totalRatings };
   },
 });
+
+// Helper functions
+async function getMovieTitle(ctx: any, movieId: string) {
+  const movie = await ctx.db.get(movieId);
+  return movie?.title || "Unknown Movie";
+}
+
+async function updateMovieRating(ctx: any, movieId: string) {
+  const ratings = await ctx.db
+    .query("ratings")
+    .withIndex("by_movie", (q: any) => q.eq("movieId", movieId))
+    .collect();
+
+  if (ratings.length === 0) return;
+
+  const avgRating =
+    ratings.reduce((sum: any, r: any) => sum + r.overallRating, 0) /
+    ratings.length;
+
+  await ctx.db.patch(movieId, {
+    avgRating: Math.round(avgRating * 10) / 10, // Round to 1 decimal
+    totalRatings: ratings.length,
+    reviews: ratings.filter((r: any) => r.review && r.review.trim().length > 0)
+      .length,
+    updatedAt: Date.now(),
+  });
+}
 
 async function updateUserRatingAchievements(ctx: any, userId: string) {
   // Get user’s ratings

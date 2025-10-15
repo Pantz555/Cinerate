@@ -6,6 +6,7 @@ import ConvexClientProvider from "@/components/ConvexClientProvider";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { Toaster } from "sonner";
 import NameChangeProvider from "@/components/NameChangeProvider";
+import { ThemeProvider } from "@/lib/theme-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -44,10 +45,12 @@ export default function RootLayout({
     <ConvexAuthNextjsServerProvider>
       <html lang="en">
         <body
-          className={`${inter.variable} font-sans antialiased bg-[#111317] text-gray-300`}
+          className={`${inter.variable} font-sans antialiased bg-background dark:bg-[#111317] text-foreground dark:text-gray-300`}
         >
           <ConvexClientProvider>
-            <div className="pb-16 md:pb-0">{children}</div>
+            <ThemeProvider>
+              <div className="pb-16 md:pb-0">{children}</div>
+            </ThemeProvider>
             <BottomNavigation />
             <NameChangeProvider />
           </ConvexClientProvider>

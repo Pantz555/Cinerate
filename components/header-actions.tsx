@@ -6,19 +6,25 @@ import { useQueryWithStatus } from "./ConvexClientProvider";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 import UserProfile from "./user-profile";
+import { ThemeToggle } from "./theme-toggle";
+import NotificationMenu from "./notification-menu";
+import { LayoutDashboard } from "lucide-react";
 
 const HeaderActions = () => {
   const { data: user, isPending } = useQueryWithStatus(api.auth.loggedInUser);
 
   return (
     <div className="flex items-center gap-3">
+      <NotificationMenu />
+      <ThemeToggle />
+
       {isPending ? (
         <HeaderSkeleton />
       ) : user?._id ? (
         <>
           {user.role && "admin" && (
             <Link href="/admin">
-              <div className="">Admin panel</div>
+              <LayoutDashboard className="size-5 shrink-0" />
             </Link>
           )}
           <Link href="/profile">
@@ -43,7 +49,9 @@ export function HeaderSkeleton() {
     <div className="flex items-center gap-3">
       {/* Profile Image Skeleton */}
       <div
-        className={cn("h-10 w-10 rounded-full bg-[#292d38] animate-pulse")}
+        className={cn(
+          "h-10 w-10 rounded-full bg-gray-200 dark:bg-[#292d38] animate-pulse",
+        )}
       />
     </div>
   );

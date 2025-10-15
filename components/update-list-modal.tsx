@@ -79,30 +79,24 @@ export function UpdateListModal({ list, trigger }: UpdateListModalProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-white hover:bg-gray-700/50 p-1 h-auto"
-            onClick={() => setOpen(true)}
-          >
+          <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
             <Pencil className="h-4 w-4" />
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-gray-900 border-gray-800">
+      <DialogContent className="sm:max-w-[500px] dark:bg-gray-900 dark:border-gray-800">
         <DialogHeader>
-          <DialogTitle className="text-white text-xl">Edit List</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogTitle className="text-foreground text-xl">
+            Edit List
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground">
             Make changes to your list details.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label
-              htmlFor="list-name"
-              className="text-white text-sm font-medium"
-            >
+            <Label htmlFor="list-name" className="text-sm font-medium">
               List Name
             </Label>
             <Input
@@ -110,16 +104,13 @@ export function UpdateListModal({ list, trigger }: UpdateListModalProps) {
               placeholder="e.g., Summer Blockbusters"
               value={listName}
               onChange={(e) => setListName(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+              className="dark:bg-gray-800 dark:border-gray-700 text-foreground dark:placeholder:text-gray-500 focus:border-blue-500"
               disabled={isUpdating}
             />
           </div>
 
           <div className="space-y-2">
-            <Label
-              htmlFor="description"
-              className="text-white text-sm font-medium"
-            >
+            <Label htmlFor="description" className="text-sm font-medium">
               Description (Optional)
             </Label>
             <Textarea
@@ -127,20 +118,20 @@ export function UpdateListModal({ list, trigger }: UpdateListModalProps) {
               placeholder="Add a description for your list..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500 min-h-[100px] resize-none"
+              className="dark:bg-gray-800 dark:border-gray-700 text-foreground dark:placeholder:text-gray-500 focus:border-blue-500 min-h-[100px] resize-none"
               disabled={isUpdating}
             />
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+          <div className="flex items-center justify-between p-4 bg-card dark:g-gray-800/50 rounded-lg border dark:border-gray-700 border-border">
             <div className="space-y-0.5">
               <Label
                 htmlFor="public-toggle"
-                className="text-white text-sm font-medium cursor-pointer"
+                className="text-sm font-medium cursor-pointer"
               >
                 Make list public
               </Label>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 Allow others to view and discover your list
               </p>
             </div>
@@ -158,7 +149,6 @@ export function UpdateListModal({ list, trigger }: UpdateListModalProps) {
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
-            className="border-gray-700 bg-transparent text-gray-300 hover:bg-gray-800 hover:text-white"
             disabled={isUpdating}
           >
             Cancel

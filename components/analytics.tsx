@@ -175,15 +175,15 @@ export default function Analytics() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="dark:bg-gray-900 dark:border-gray-800">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-white">
+            <CardTitle className="text-sm font-medium text-foreground">
               Total Ratings
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-bold text-foreground">
                 {dashboardStats.overview.totalRatings.toLocaleString()}
               </div>
               <div className="flex items-center text-green-500 text-sm">
@@ -196,20 +196,20 @@ export default function Analytics() {
                 (dashboardStats.overview.totalRatings / 20000) * 100,
                 100,
               )}
-              className="mt-2 bg-white"
+              className="mt-2 bg-foreground"
             />
           </CardContent>
         </Card>
 
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="dark:bg-gray-900 dark:border-gray-800">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-white">
+            <CardTitle className="text-sm font-medium text-foreground">
               Active Users
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-bold text-foreground">
                 {dashboardStats.overview.totalUsers.toLocaleString()}
               </div>
               <div className="flex items-center text-green-500 text-sm">
@@ -227,15 +227,17 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="dark:bg-gray-900 dark:border-gray-800">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-white">
+            <CardTitle className="text-sm font-medium text-foreground">
               Avg Rating
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-white">{avgRating}</div>
+              <div className="text-2xl font-bold text-foreground">
+                {avgRating}
+              </div>
               <div className="flex items-center text-blue-500 text-sm">
                 <TrendingUp className="w-4 h-4 mr-1" />
                 Stable
@@ -245,15 +247,15 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="dark:bg-gray-900 dark:border-gray-800">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-white">
+            <CardTitle className="text-sm font-medium text-foreground">
               Total Views
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-bold text-foreground">
                 {dashboardStats.overview.totalViews.toLocaleString()}
               </div>
               <div className="flex items-center text-green-500 text-sm">
@@ -274,28 +276,28 @@ export default function Analytics() {
 
       <Tabs defaultValue="overview" className="space-y-6">
         <div className="overflow-x-auto">
-          <TabsList className="bg-gray-900 border-gray-800 w-full sm:w-auto">
+          <TabsList className="dark:bg-gray-900 dark:border-gray-800 w-full sm:w-auto">
             <TabsTrigger
               value="overview"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300 whitespace-nowrap"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger
               value="ratings"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300 whitespace-nowrap"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap"
             >
               Ratings Analysis
             </TabsTrigger>
             <TabsTrigger
               value="users"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300 whitespace-nowrap"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap"
             >
               User Behavior
             </TabsTrigger>
             <TabsTrigger
               value="content"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-gray-300 whitespace-nowrap"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-foreground text-muted-foreground whitespace-nowrap"
             >
               Content Performance
             </TabsTrigger>
@@ -304,9 +306,9 @@ export default function Analytics() {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-white">Rating Trends</CardTitle>
+                <CardTitle className="text-foreground">Rating Trends</CardTitle>
                 <CardDescription>
                   Monthly rating activity and user growth
                 </CardDescription>
@@ -345,9 +347,11 @@ export default function Analytics() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-white">Genre Popularity</CardTitle>
+                <CardTitle className="text-foreground">
+                  Genre Popularity
+                </CardTitle>
                 <CardDescription>
                   Distribution of ratings by movie genre
                 </CardDescription>
@@ -386,9 +390,9 @@ export default function Analytics() {
             </Card>
           </div>
 
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="dark:bg-gray-900 dark:border-gray-800">
             <CardHeader>
-              <CardTitle className="text-white">
+              <CardTitle className="text-foreground">
                 Top Performing Movies
               </CardTitle>
               <CardDescription>
@@ -400,17 +404,17 @@ export default function Analytics() {
                 {topMovies.map((movie, index) => (
                   <div
                     key={movie.id}
-                    className="flex items-center justify-between p-3 bg-gray-800 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-accent dark:bg-gray-800 rounded-lg"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-bold">
+                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                         {index + 1}
                       </div>
                       <div>
-                        <div className="font-medium text-white">
+                        <div className="font-medium text-foreground">
                           {movie.title}
                         </div>
-                        <div className="text-sm text-white">
+                        <div className="text-sm text-foreground">
                           {movie.views.toLocaleString()} views
                         </div>
                       </div>
@@ -418,7 +422,7 @@ export default function Analytics() {
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        <span className="font-medium text-white">
+                        <span className="font-medium text-foreground">
                           {movie.avgRating?.toFixed(1) || "N/A"}
                         </span>
                       </div>
@@ -433,9 +437,9 @@ export default function Analytics() {
 
         <TabsContent value="ratings" className="space-y-6">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-white">
+                <CardTitle className="text-foreground">
                   Rating Categories Analysis
                 </CardTitle>
                 <CardDescription>Average ratings by category</CardDescription>
@@ -474,9 +478,9 @@ export default function Analytics() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-white">
+                <CardTitle className="text-foreground">
                   Rating Distribution
                 </CardTitle>
                 <CardDescription>
@@ -488,11 +492,11 @@ export default function Analytics() {
                   {categoryBreakdown.map((category) => (
                     <div
                       key={category.category}
-                      className="space-y-2 text-white"
+                      className="space-y-2 text-foreground"
                     >
                       <div className="flex justify-between text-sm">
                         <span>{category.category}</span>
-                        <span className="text-white">
+                        <span className="text-foreground">
                           {category.totalRatings} ratings
                         </span>
                       </div>
@@ -512,9 +516,9 @@ export default function Analytics() {
         </TabsContent>
 
         <TabsContent value="users" className="space-y-6">
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="dark:bg-gray-900 dark:border-gray-800">
             <CardHeader>
-              <CardTitle className="text-white">
+              <CardTitle className="text-foreground">
                 Weekly User Engagement
               </CardTitle>
               <CardDescription>
@@ -556,30 +560,30 @@ export default function Analytics() {
 
         <TabsContent value="content" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-white">
+                <CardTitle className="text-sm font-medium text-foreground">
                   Total Movies
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-foreground">
                   {dashboardStats.overview.publishedMovies.toLocaleString()}
                 </div>
-                <p className="text-xs text-white mt-1">
+                <p className="text-xs text-foreground mt-1">
                   {dashboardStats.overview.draftMovies} drafts
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-white">
+                <CardTitle className="text-sm font-medium text-foreground">
                   Avg Views per Movie
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-foreground">
                   {dashboardStats.overview.publishedMovies > 0
                     ? Math.round(
                         dashboardStats.overview.totalViews /
@@ -587,21 +591,23 @@ export default function Analytics() {
                       ).toLocaleString()
                     : 0}
                 </div>
-                <p className="text-xs text-white mt-1">per published movie</p>
+                <p className="text-xs text-foreground mt-1">
+                  per published movie
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-white">
+                <CardTitle className="text-sm font-medium text-foreground">
                   Total Reviews
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-foreground">
                   {dashboardStats.overview.totalReviews.toLocaleString()}
                 </div>
-                <p className="text-xs text-white mt-1">
+                <p className="text-xs text-foreground mt-1">
                   Community reviews published
                 </p>
               </CardContent>

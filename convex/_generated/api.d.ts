@@ -20,10 +20,13 @@ import type * as http from "../http.js";
 import type * as lists from "../lists.js";
 import type * as movieComments from "../movieComments.js";
 import type * as movies from "../movies.js";
+import type * as notificationHelpers from "../notificationHelpers.js";
+import type * as notifications from "../notifications.js";
 import type * as profile from "../profile.js";
 import type * as rag from "../rag.js";
 import type * as ratings from "../ratings.js";
 import type * as recommendations from "../recommendations.js";
+import type * as settings from "../settings.js";
 import type * as viewTracking from "../viewTracking.js";
 
 import type {
@@ -53,10 +56,13 @@ declare const fullApi: ApiFromModules<{
   lists: typeof lists;
   movieComments: typeof movieComments;
   movies: typeof movies;
+  notificationHelpers: typeof notificationHelpers;
+  notifications: typeof notifications;
   profile: typeof profile;
   rag: typeof rag;
   ratings: typeof ratings;
   recommendations: typeof recommendations;
+  settings: typeof settings;
   viewTracking: typeof viewTracking;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

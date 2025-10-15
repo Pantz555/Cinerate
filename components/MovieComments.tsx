@@ -77,7 +77,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
     <div className="flex flex-col gap-3">
       <div className="flex items-start gap-3">
         <div
-          className="size-8 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
+          className="size-8 shrink-0 rounded-full bg-gray-200 dark:bg-[#292d38] bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: comment.user?.image
               ? `url("${comment.user.image}")`
@@ -85,20 +85,20 @@ const CommentItem: React.FC<CommentItemProps> = ({
           }}
         >
           {!comment.user.image && (
-            <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+            <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-muted-foreground">
               {comment.user.name?.charAt(0)?.toUpperCase() || "A"}
             </div>
           )}
         </div>
 
         <div className="flex-1">
-          <div className="bg-[#1a1d23] border border-[#292d38] p-3 rounded-lg">
+          <div className="bg-gray-200 dark:bg-[#1a1d23] border-border darK:border dark:border-[#292d38] p-3 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-baseline gap-2">
-                <p className="text-white text-sm font-semibold">
+                <p className="text-foreground text-sm font-semibold">
                   {comment.user.name || "Anonymous"}
                 </p>
-                <p className="text-[#9ea4b7] text-xs">
+                <p className="text-muted-foreground text-xs">
                   {timeAgo(comment._creationTime)}
                   {comment.isEdited && " (edited)"}
                 </p>
@@ -107,13 +107,13 @@ const CommentItem: React.FC<CommentItemProps> = ({
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="text-[#9ea4b7] hover:text-white transition-colors p-1"
+                    className="text-foreground  transition-colors p-1"
                   >
                     <Edit className="h-3 w-3" />
                   </button>
                   <button
                     onClick={() => onDelete(comment._id)}
-                    className="text-[#9ea4b7] hover:text-red-400 transition-colors p-1"
+                    className="text-foreground hover:text-red-400 transition-colors p-1"
                   >
                     {isDeleting ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -130,7 +130,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                 <textarea
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
-                  className="w-full p-2 bg-[#292d38] border border-[#3d4252] rounded text-white text-sm resize-none"
+                  className="w-full p-2 dark:bg-[#292d38] border-border border dark:border-[#3d4252] rounded text-muted-foreground text-sm resize-none "
                   rows={3}
                   maxLength={1000}
                 />
@@ -151,7 +151,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                 </div>
               </div>
             ) : (
-              <p className="text-white/90 text-sm leading-relaxed">
+              <p className="text-foreground/90 text-sm leading-relaxed">
                 {comment.content}
               </p>
             )}
@@ -159,7 +159,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
           <div className="flex items-center gap-4 text-[#9ea4b7] mt-2 px-2">
             <button
-              className={`flex items-center gap-1.5 text-xs hover:text-white transition-colors ${
+              className={`flex items-center gap-1.5 text-xs hover:text-foreground transition-colors ${
                 userReaction === "like" ? "text-blue-400" : ""
               }`}
               onClick={() => onReact(comment._id, "like")}
@@ -170,7 +170,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
               {comment.likesCount}
             </button>
             <button
-              className={`flex items-center gap-1.5 text-xs hover:text-white transition-colors ${
+              className={`flex items-center gap-1.5 text-xs  transition-colors hover:text-foreground ${
                 userReaction === "dislike" ? "text-red-400" : ""
               }`}
               onClick={() => onReact(comment._id, "dislike")}
@@ -181,14 +181,14 @@ const CommentItem: React.FC<CommentItemProps> = ({
               {comment.dislikesCount}
             </button>
             <button
-              className="flex items-center gap-1.5 text-xs hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-xs  transition-colors"
               onClick={() => onReply(comment._id)}
             >
               <Reply className="h-3 w-3" /> Reply
             </button>
             {(comment.repliesCount || 0) > 0 && (
               <button
-                className="flex items-center gap-1.5 text-xs hover:text-white transition-colors"
+                className="flex items-center gap-1.5 text-xs  transition-colors"
                 onClick={() => setShowReplies(!showReplies)}
               >
                 <MessageCircle className="h-3 w-3" />
@@ -392,7 +392,7 @@ export default function MovieComments({
 
   return (
     <section>
-      <h2 className="text-white text-2xl font-bold leading-tight tracking-tight mb-4">
+      <h2 className="text-foreground text-2xl font-bold leading-tight tracking-tight mb-4">
         Comments
       </h2>
 
@@ -400,7 +400,7 @@ export default function MovieComments({
       <div className="mb-6">
         <div className="flex gap-3">
           <div
-            className="size-8 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
+            className="size-8 shrink-0 rounded-full bg-gray-200 dark:bg-[#292d38] bg-cover bg-center bg-no-repeat"
             style={{
               backgroundImage: user?.image
                 ? `url("${user?.image}")`
@@ -408,7 +408,7 @@ export default function MovieComments({
             }}
           >
             {!user?.image && (
-              <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+              <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-foreground">
                 {user?.name?.charAt(0)?.toUpperCase() || "A"}
               </div>
             )}
@@ -422,13 +422,13 @@ export default function MovieComments({
                   ? "Write a comment..."
                   : "Please log in to comment"
               }
-              className="w-full p-3 bg-[#1a1d23] border border-[#292d38] rounded-lg text-white text-sm resize-none placeholder-[#9ea4b7]"
+              className="w-full p-3 darK:bg-[#1a1d23] border dark:border-[#292d38] rounded-lg text-muted-foreground text-sm resize-none dark:placeholder-[#9ea4b7] placeholder-foreground"
               rows={3}
               maxLength={1000}
               disabled={!currentUserId}
             />
             <div className="flex justify-between items-center mt-2">
-              <p className="text-xs text-[#9ea4b7]">
+              <p className="text-xs text-muted-foreground">
                 {newComment.length}/1000 characters
               </p>
               <Button
@@ -442,7 +442,7 @@ export default function MovieComments({
                   isReplying
                 }
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex text-white items-center gap-2"
               >
                 {isCommenting ? (
                   <>
@@ -462,8 +462,8 @@ export default function MovieComments({
 
       {/* Reply form */}
       {replyingTo && (
-        <div className="mb-6 ml-8 p-4 bg-[#1a1d23] border border-[#292d38] rounded-lg">
-          <p className="text-white text-sm font-medium mb-2">
+        <div className="mb-6 ml-8 p-4 bg-card dark:bg-[#1a1d23] border border-border dark:border-[#292d38] rounded-lg">
+          <p className="text-muted-foreground text-sm font-medium mb-2">
             Replying to comment:
           </p>
           <div className="flex gap-3">
@@ -471,7 +471,7 @@ export default function MovieComments({
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               placeholder="Write a reply..."
-              className="flex-1 p-3 bg-[#292d38] border border-[#3d4252] rounded text-white text-sm resize-none"
+              className="flex-1 p-3 bg-background dark:bg-[#292d38] border-border dark:border-[#3d4252] rounded text-foreground text-sm resize-none"
               rows={2}
               maxLength={1000}
             />
@@ -528,7 +528,7 @@ export default function MovieComments({
               </motion.div>
             ))
           ) : (
-            <p className="text-white/70 text-sm">
+            <p className="text-foreground/70 text-sm">
               No comments yet. Be the first to comment!
             </p>
           )}

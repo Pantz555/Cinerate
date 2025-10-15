@@ -80,15 +80,15 @@ export function AddToListButton({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-64 bg-gray-900 border-gray-800"
+        className="w-64 dark:bg-gray-900 dark:border-gray-800"
       >
         {lists === undefined ? (
           <div className="py-6 flex justify-center">
             <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
           </div>
         ) : lists.length === 0 ? (
-          <div className="py-4 px-2 text-center text-gray-400 text-sm">
-            <List className="h-8 w-8 mx-auto mb-2 text-gray-600" />
+          <div className="py-4 px-2 text-center dark:text-gray-400 text-sm">
+            <List className="h-8 w-8 mx-auto mb-2 dark:text-gray-600" />
             <p className="mb-3">No lists yet</p>
             <CreateListModal
               trigger={
@@ -105,7 +105,7 @@ export function AddToListButton({
           </div>
         ) : (
           <>
-            <div className="px-2 py-1.5 text-xs font-medium text-gray-400 uppercase">
+            <div className="px-2 py-1.5 text-xs font-medium dark:text-gray-400 uppercase">
               Add to list
             </div>
             {lists.map((list) => {
@@ -117,7 +117,7 @@ export function AddToListButton({
                   key={list._id}
                   onClick={() => handleToggleList(list._id)}
                   disabled={isProcessing}
-                  className="flex items-center justify-between cursor-pointer text-gray-300 hover:text-white hover:bg-gray-800"
+                  className="flex items-center justify-between cursor-pointer dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
                 >
                   <span className="flex items-center gap-2">
                     {inList && <Check className="h-4 w-4 text-green-500" />}
@@ -129,7 +129,7 @@ export function AddToListButton({
                 </DropdownMenuItem>
               );
             })}
-            <DropdownMenuSeparator className="bg-gray-800" />
+            <DropdownMenuSeparator className="dark:bg-gray-800" />
             <CreateListModal
               trigger={
                 <DropdownMenuItem

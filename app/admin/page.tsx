@@ -360,17 +360,17 @@ export default function AdminPage() {
   });
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-[#0f1419]">
+    <div className="relative flex min-h-screen w-full flex-col bg-background dark:bg-[#0f1419]">
       <Header />
       <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8 pb-20 md:pb-8">
         <div className="mx-auto max-w-7xl">
           {/* Header Section */}
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-4xl font-bold tracking-tight text-white">
+              <h1 className="text-4xl font-bold tracking-tight text-foreground">
                 Movie Admin
               </h1>
-              <p className="mt-2 text-lg text-gray-400">
+              <p className="mt-2 text-lg text-muted-foreground">
                 Manage your movie database
               </p>
             </div>
@@ -381,16 +381,16 @@ export default function AdminPage() {
                   Add New Movie
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-[#1a1d23] border-gray-700 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="dark:bg-[#1a1d23] dark:border-gray-700 text-foreground max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="text-white">
+                  <DialogTitle className="text-foreground">
                     Add New Movie
                   </DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="title" className="text-gray-300">
+                      <Label htmlFor="title" className="text-muted-foreground">
                         Title *
                       </Label>
                       <Input
@@ -399,12 +399,12 @@ export default function AdminPage() {
                         onChange={(e) =>
                           setMovieForm({ ...movieForm, title: e.target.value })
                         }
-                        className="bg-[#2a2d38] border-gray-600 text-white"
+                        className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                         placeholder="Movie title"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="year" className="text-gray-300">
+                      <Label htmlFor="year" className="text-muted-foreground">
                         Year *
                       </Label>
                       <Input
@@ -413,13 +413,16 @@ export default function AdminPage() {
                         onChange={(e) =>
                           setMovieForm({ ...movieForm, year: e.target.value })
                         }
-                        className="bg-[#2a2d38] border-gray-600 text-white"
+                        className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                         placeholder="2024"
                       />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="description" className="text-gray-300">
+                    <Label
+                      htmlFor="description"
+                      className="text-muted-foreground"
+                    >
                       Description
                     </Label>
                     <Textarea
@@ -431,14 +434,14 @@ export default function AdminPage() {
                           description: e.target.value,
                         })
                       }
-                      className="bg-[#2a2d38] border-gray-600 text-white"
+                      className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                       placeholder="Movie description..."
                       rows={3}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="genres" className="text-gray-300">
+                      <Label htmlFor="genres" className="text-muted-foreground">
                         Genres *
                       </Label>
                       <Input
@@ -453,12 +456,15 @@ export default function AdminPage() {
                               .filter((g: any) => g), // Convert to array
                           })
                         }
-                        className="bg-[#2a2d38] border-gray-600 text-white"
+                        className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                         placeholder="Action, Drama, Sci-Fi"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="director" className="text-gray-300">
+                      <Label
+                        htmlFor="director"
+                        className="text-muted-foreground"
+                      >
                         Director *
                       </Label>
                       <Input
@@ -470,13 +476,13 @@ export default function AdminPage() {
                             director: e.target.value,
                           })
                         }
-                        className="bg-[#2a2d38] border-gray-600 text-white"
+                        className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                         placeholder="Director name"
                       />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="cast" className="text-gray-300">
+                    <Label htmlFor="cast" className="text-muted-foreground">
                       Cast
                     </Label>
                     <Input
@@ -485,13 +491,15 @@ export default function AdminPage() {
                       onChange={(e) =>
                         setMovieForm({ ...movieForm, cast: e.target.value })
                       }
-                      className="bg-[#2a2d38] border-gray-600 text-white"
+                      className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                       placeholder="Actor 1, Actor 2, Actor 3"
                     />
                   </div>
 
                   <div>
-                    <Label className="text-gray-300">Movie Poster</Label>
+                    <Label className="text-muted-foreground">
+                      Movie Poster
+                    </Label>
                     <div className="space-y-4">
                       <div className="flex items-center gap-4">
                         <div className="flex-1">
@@ -499,14 +507,14 @@ export default function AdminPage() {
                             type="file"
                             accept="image/*"
                             onChange={handlePosterUpload}
-                            className="bg-[#2a2d38] border-gray-600 text-white file:bg-blue-600 file:text-white file:border-0 file:rounded file:px-3 file:py-1 file:mr-3"
+                            className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground file:bg-blue-600 file:text-white file:border-0 file:rounded file:px-3 file:py-1 file:mr-3"
                           />
                         </div>
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="border-gray-600 text-white hover:bg-gray-700 bg-transparent"
+                          className="dark:border-gray-600 text-foreground dark:dark:hover:bg-gray-700 border-border bg-transparent"
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           Upload
@@ -535,11 +543,16 @@ export default function AdminPage() {
                       )}
 
                       <div className="text-center">
-                        <span className="text-gray-400 text-sm">or</span>
+                        <span className="text-muted-foreground text-sm">
+                          or
+                        </span>
                       </div>
 
                       <div>
-                        <Label htmlFor="poster-url" className="text-gray-300">
+                        <Label
+                          htmlFor="poster-url"
+                          className="text-muted-foreground"
+                        >
                           Poster URL
                         </Label>
                         <Input
@@ -552,7 +565,7 @@ export default function AdminPage() {
                             });
                             setPosterPreview(e.target.value);
                           }}
-                          className="bg-[#2a2d38] border-gray-600 text-white"
+                          className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                           placeholder="https://example.com/poster.jpg"
                         />
                       </div>
@@ -561,7 +574,10 @@ export default function AdminPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="duration" className="text-gray-300">
+                      <Label
+                        htmlFor="duration"
+                        className="text-muted-foreground"
+                      >
                         Duration
                       </Label>
                       <Input
@@ -573,12 +589,12 @@ export default function AdminPage() {
                             duration: e.target.value,
                           })
                         }
-                        className="bg-[#2a2d38] border-gray-600 text-white"
+                        className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                         placeholder="2h 30m"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="status" className="text-gray-300">
+                      <Label htmlFor="status" className="text-muted-foreground">
                         Status
                       </Label>
                       <Select
@@ -587,25 +603,25 @@ export default function AdminPage() {
                           setMovieForm({ ...movieForm, status: value })
                         }
                       >
-                        <SelectTrigger className="bg-[#2a2d38] border-gray-600 text-white">
+                        <SelectTrigger className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#2a2d38] border-gray-600">
+                        <SelectContent className="dark:bg-[#2a2d38] dark:border-gray-600">
                           <SelectItem
                             value="published"
-                            className="text-white hover:bg-gray-700"
+                            className="text-foreground dark:hover:bg-gray-700"
                           >
                             Published
                           </SelectItem>
                           <SelectItem
                             value="draft"
-                            className="text-white hover:bg-gray-700"
+                            className="text-foreground dark:hover:bg-gray-700"
                           >
                             Draft
                           </SelectItem>
                           <SelectItem
                             value="archived"
-                            className="text-white hover:bg-gray-700"
+                            className="text-foreground dark:hover:bg-gray-700"
                           >
                             Archived
                           </SelectItem>
@@ -615,7 +631,7 @@ export default function AdminPage() {
                   </div>
 
                   <div>
-                    <Label className="text-gray-300">Featured</Label>
+                    <Label className="text-muted-foreground">Featured</Label>
                     <Switch
                       checked={movieForm.featured}
                       onCheckedChange={(v) =>
@@ -628,7 +644,7 @@ export default function AdminPage() {
                   </div>
 
                   <div>
-                    <Label className="text-gray-300">Trending</Label>
+                    <Label className="text-muted-foreground">Trending</Label>
                     <Switch
                       checked={movieForm.trending}
                       onCheckedChange={(v) =>
@@ -648,7 +664,7 @@ export default function AdminPage() {
                       setIsAddMovieOpen(false);
                     }}
                     disabled={isAddingMovie}
-                    className="border-gray-600 text-black hover:bg-gray-700 hover:text-black"
+                    className="dark:border-gray-600 text-foreground dark:hover:bg-gray-700 hover:text-foreground"
                   >
                     Cancel
                   </Button>
@@ -675,22 +691,22 @@ export default function AdminPage() {
           </div>
 
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="bg-[#1a1d23] border-gray-700">
+            <TabsList className="dark:bg-[#1a1d23] dark:border-gray-700">
               <TabsTrigger
                 value="overview"
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-foreground"
               >
                 Overview
               </TabsTrigger>
               <TabsTrigger
                 value="movies"
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-foreground"
               >
                 Movies
               </TabsTrigger>
               <TabsTrigger
                 value="analytics"
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-foreground"
               >
                 Analytics
               </TabsTrigger>
@@ -701,65 +717,65 @@ export default function AdminPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                 <Card className="bg-gradient-to-br from-blue-900/20 to-blue-800/10 border-blue-800/30">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-300">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
                       Total Movies
                     </CardTitle>
                     <Film className="h-4 w-4 text-blue-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-2xl font-bold text-foreground">
                       {movieStats?.overview.totalMovies}
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="bg-gradient-to-br from-green-900/20 to-green-800/10 border-green-800/30">
+                <Card className="bg-gradient-to-br from-green-900/20 to-green-800/10 dark:border-green-800/30 border-border">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-300">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
                       Published
                     </CardTitle>
                     <Eye className="h-4 w-4 text-green-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-2xl font-bold text-foreground">
                       {movieStats?.overview.publishedMovies}
                     </div>
                   </CardContent>
                 </Card>
                 <Card className="bg-gradient-to-br from-yellow-900/20 to-yellow-800/10 border-yellow-800/30">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-300">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
                       Drafts
                     </CardTitle>
                     <EyeOff className="h-4 w-4 text-yellow-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-2xl font-bold text-foreground">
                       {movieStats?.overview.draftMovies}
                     </div>
                   </CardContent>
                 </Card>
                 <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 border-purple-800/30">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-300">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
                       Total Views
                     </CardTitle>
                     <TrendingUp className="h-4 w-4 text-purple-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-2xl font-bold text-foreground">
                       {movieStats?.overview.totalViews}
                     </div>
                   </CardContent>
                 </Card>
                 <Card className="bg-gradient-to-br from-pink-900/20 to-pink-800/10 border-pink-800/30">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-300">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
                       Total Reviews
                     </CardTitle>
                     <Users className="h-4 w-4 text-pink-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-2xl font-bold text-foreground">
                       {movieStats?.overview.totalReviews}
                     </div>
                   </CardContent>
@@ -774,42 +790,42 @@ export default function AdminPage() {
               {/* Search and Filter */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
                     placeholder="Search movies..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-[#1a1d23] border-gray-600 text-white"
+                    className="pl-10 dark:bg-[#1a1d23] dark:border-gray-600 text-foreground"
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-gray-400" />
+                  <Filter className="h-4 w-4 text-muted-foreground" />
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-[140px] bg-[#1a1d23] border-gray-600 text-white">
+                    <SelectTrigger className="w-[140px] dark:bg-[#1a1d23] dark:border-gray-600 text-foreground">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1a1d23] border-gray-600">
+                    <SelectContent className="dark:bg-[#1a1d23] dark:border-gray-600">
                       <SelectItem
                         value="all"
-                        className="text-white hover:bg-gray-700"
+                        className="text-foreground dark:hover:bg-gray-700"
                       >
                         All Status
                       </SelectItem>
                       <SelectItem
                         value="published"
-                        className="text-white hover:bg-gray-700"
+                        className="text-foreground dark:hover:bg-gray-700"
                       >
                         Published
                       </SelectItem>
                       <SelectItem
                         value="draft"
-                        className="text-white hover:bg-gray-700"
+                        className="text-foreground dark:hover:bg-gray-700"
                       >
                         Draft
                       </SelectItem>
                       <SelectItem
                         value="archived"
-                        className="text-white hover:bg-gray-700"
+                        className="text-foreground dark:hover:bg-gray-700"
                       >
                         Archived
                       </SelectItem>
@@ -828,7 +844,7 @@ export default function AdminPage() {
                   : filteredMovies?.map((movie) => (
                       <Card
                         key={movie?._id}
-                        className="bg-[#1a1d23] border-gray-700 overflow-hidden group hover:border-blue-500/50 transition-colors"
+                        className="dark:bg-[#1a1d23] dark:border-gray-700 overflow-hidden group hover:border-blue-500/50 transition-colors"
                       >
                         <div className="aspect-[2/3] relative overflow-hidden">
                           <Image
@@ -861,31 +877,31 @@ export default function AdminPage() {
 
                           {movie?.featured && (
                             <div className="absolute top-2 left-2">
-                              <Badge className="bg-green-500 text-white">
+                              <Badge className="bg-green-500 text-foreground">
                                 Featured
                               </Badge>
                             </div>
                           )}
                         </div>
                         <CardContent className="p-4">
-                          <h3 className="text-white font-semibold text-lg mb-1 truncate">
+                          <h3 className="text-foreground font-semibold text-lg mb-1 truncate">
                             {movie.title}
                           </h3>
-                          <p className="text-gray-400 text-sm mb-2">
+                          <p className="text-muted-foreground text-sm mb-2">
                             {movie.director} • {movie.year}
                           </p>
-                          <p className="text-gray-500 text-xs mb-3">
+                          <p className="text-muted-foreground text-xs mb-3">
                             {movie.genre}
                           </p>
 
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-1">
                               <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <span className="text-white text-sm">
+                              <span className="text-foreground text-sm">
                                 {movie.avgRating || "N/A"}
                               </span>
                             </div>
-                            <div className="text-gray-400 text-xs">
+                            <div className="text-muted-foreground text-xs">
                               {movie.views} views • {movie.reviews} reviews
                             </div>
                           </div>
@@ -899,16 +915,16 @@ export default function AdminPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="flex-1 border-gray-600 text-white hover:bg-gray-700 bg-transparent"
+                                  className="flex-1 border-border dark:border-gray-600 text-foreground dark:hover:bg-gray-700 bg-transparent"
                                   onClick={() => handleEditMovie(movie)}
                                 >
                                   <Edit className="h-3 w-3 mr-1" />
                                   Edit
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="bg-[#1a1d23] border-gray-700 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+                              <DialogContent className="dark:bg-[#1a1d23] dark:border-gray-700 text-foreground max-w-2xl max-h-[90vh] overflow-y-auto">
                                 <DialogHeader>
-                                  <DialogTitle className="text-white">
+                                  <DialogTitle className="text-foreground">
                                     Edit Movie: {editingMovie?.title}
                                   </DialogTitle>
                                 </DialogHeader>
@@ -917,7 +933,7 @@ export default function AdminPage() {
                                     <div>
                                       <Label
                                         htmlFor="edit-title"
-                                        className="text-gray-300"
+                                        className="text-muted-foreground"
                                       >
                                         Title *
                                       </Label>
@@ -930,13 +946,13 @@ export default function AdminPage() {
                                             title: e.target.value,
                                           })
                                         }
-                                        className="bg-[#2a2d38] border-gray-600 text-white"
+                                        className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                                       />
                                     </div>
                                     <div>
                                       <Label
                                         htmlFor="edit-year"
-                                        className="text-gray-300"
+                                        className="text-muted-foreground"
                                       >
                                         Year *
                                       </Label>
@@ -949,14 +965,14 @@ export default function AdminPage() {
                                             year: e.target.value,
                                           })
                                         }
-                                        className="bg-[#2a2d38] border-gray-600 text-white"
+                                        className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                                       />
                                     </div>
                                   </div>
                                   <div>
                                     <Label
                                       htmlFor="edit-description"
-                                      className="text-gray-300"
+                                      className="text-muted-foreground"
                                     >
                                       Description
                                     </Label>
@@ -969,7 +985,7 @@ export default function AdminPage() {
                                           description: e.target.value,
                                         })
                                       }
-                                      className="bg-[#2a2d38] border-gray-600 text-white"
+                                      className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                                       rows={3}
                                     />
                                   </div>
@@ -977,7 +993,7 @@ export default function AdminPage() {
                                     <div>
                                       <Label
                                         htmlFor="edit-genres"
-                                        className="text-gray-300"
+                                        className="text-muted-foreground"
                                       >
                                         Genres *
                                       </Label>
@@ -995,14 +1011,14 @@ export default function AdminPage() {
                                               .filter((g: any) => g),
                                           })
                                         }
-                                        className="bg-[#2a2d38] border-gray-600 text-white"
+                                        className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                                         placeholder="Action, Drama, Sci-Fi"
                                       />
                                     </div>
                                     <div>
                                       <Label
                                         htmlFor="edit-director"
-                                        className="text-gray-300"
+                                        className="text-muted-foreground"
                                       >
                                         Director *
                                       </Label>
@@ -1015,7 +1031,7 @@ export default function AdminPage() {
                                             director: e.target.value,
                                           })
                                         }
-                                        className="bg-[#2a2d38] border-gray-600 text-white"
+                                        className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                                       />
                                     </div>
                                   </div>
@@ -1023,7 +1039,7 @@ export default function AdminPage() {
                                   <div>
                                     <Label
                                       htmlFor="edit-cast"
-                                      className="text-gray-300"
+                                      className="text-muted-foreground"
                                     >
                                       Cast
                                     </Label>
@@ -1036,13 +1052,13 @@ export default function AdminPage() {
                                           cast: e.target.value,
                                         })
                                       }
-                                      className="bg-[#2a2d38] border-gray-600 text-white"
+                                      className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                                       placeholder="Actor 1, Actor 2, Actor 3"
                                     />
                                   </div>
 
                                   <div>
-                                    <Label className="text-gray-300">
+                                    <Label className="text-muted-foreground">
                                       Movie Poster
                                     </Label>
                                     <div className="space-y-4">
@@ -1052,14 +1068,14 @@ export default function AdminPage() {
                                             type="file"
                                             accept="image/*"
                                             onChange={handlePosterUpload}
-                                            className="bg-[#2a2d38] border-gray-600 text-white file:bg-blue-600 file:text-white file:border-0 file:rounded file:px-3 file:py-1 file:mr-3"
+                                            className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground file:bg-blue-600 file:text-foreground file:border-0 file:rounded file:px-3 file:py-1 file:mr-3"
                                           />
                                         </div>
                                         <Button
                                           type="button"
                                           variant="outline"
                                           size="sm"
-                                          className="border-gray-600 text-white hover:bg-gray-700 bg-transparent"
+                                          className="border-border dark:border-gray-600 text-foreground dark:hover:bg-gray-700 bg-transparent"
                                         >
                                           <Upload className="h-4 w-4 mr-2" />
                                           Upload
@@ -1076,7 +1092,7 @@ export default function AdminPage() {
                                             width={128}
                                             height={192}
                                             alt="Poster preview"
-                                            className="w-full h-full object-cover rounded-lg border border-gray-600"
+                                            className="w-full h-full object-cover rounded-lg border border-border dark:border-gray-600"
                                           />
                                           <Button
                                             type="button"
@@ -1091,7 +1107,7 @@ export default function AdminPage() {
                                       )}
 
                                       <div className="text-center">
-                                        <span className="text-gray-400 text-sm">
+                                        <span className="text-muted-foreground text-sm">
                                           or
                                         </span>
                                       </div>
@@ -1099,7 +1115,7 @@ export default function AdminPage() {
                                       <div>
                                         <Label
                                           htmlFor="edit-poster-url"
-                                          className="text-gray-300"
+                                          className="text-muted-foreground"
                                         >
                                           Poster URL
                                         </Label>
@@ -1113,7 +1129,7 @@ export default function AdminPage() {
                                             });
                                             setPosterPreview(e.target.value);
                                           }}
-                                          className="bg-[#2a2d38] border-gray-600 text-white"
+                                          className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                                           placeholder="https://example.com/poster.jpg"
                                         />
                                       </div>
@@ -1124,7 +1140,7 @@ export default function AdminPage() {
                                     <div>
                                       <Label
                                         htmlFor="edit-duration"
-                                        className="text-gray-300"
+                                        className="text-muted-foreground"
                                       >
                                         Duration
                                       </Label>
@@ -1137,7 +1153,7 @@ export default function AdminPage() {
                                             duration: e.target.value,
                                           })
                                         }
-                                        className="bg-[#2a2d38] border-gray-600 text-white"
+                                        className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground"
                                         placeholder="2h 30m"
                                       />
                                     </div>
@@ -1145,7 +1161,7 @@ export default function AdminPage() {
                                     <div>
                                       <Label
                                         htmlFor="edit-status"
-                                        className="text-gray-300"
+                                        className="text-muted-foreground"
                                       >
                                         Status
                                       </Label>
@@ -1158,25 +1174,25 @@ export default function AdminPage() {
                                           })
                                         }
                                       >
-                                        <SelectTrigger className="bg-[#2a2d38] border-gray-600 text-white">
+                                        <SelectTrigger className="dark:bg-[#2a2d38] dark:border-gray-600 text-foreground">
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-[#2a2d38] border-gray-600">
+                                        <SelectContent className="dark:bg-[#2a2d38] dark:border-gray-600">
                                           <SelectItem
                                             value="published"
-                                            className="text-white hover:bg-gray-700"
+                                            className="text-foreground dark:hover:bg-gray-700"
                                           >
                                             Published
                                           </SelectItem>
                                           <SelectItem
                                             value="draft"
-                                            className="text-white hover:bg-gray-700"
+                                            className="text-foreground dark:hover:bg-gray-700"
                                           >
                                             Draft
                                           </SelectItem>
                                           <SelectItem
                                             value="archived"
-                                            className="text-white hover:bg-gray-700"
+                                            className="text-foreground dark:hover:bg-gray-700"
                                           >
                                             Archived
                                           </SelectItem>
@@ -1186,7 +1202,7 @@ export default function AdminPage() {
                                   </div>
 
                                   <div>
-                                    <Label className="text-gray-300">
+                                    <Label className="text-muted-foreground">
                                       Featured
                                     </Label>
                                     <Switch
@@ -1201,7 +1217,7 @@ export default function AdminPage() {
                                   </div>
 
                                   <div>
-                                    <Label className="text-gray-300">
+                                    <Label className="text-muted-foreground">
                                       Trending
                                     </Label>
                                     <Switch
@@ -1223,14 +1239,14 @@ export default function AdminPage() {
                                       setIsMovieEditOpen(false);
                                       resetForm();
                                     }}
-                                    className="border-gray-600 text-black hover:bg-gray-700"
+                                    className="border-gray-600 text-foreground dark:hover:bg-gray-700"
                                   >
                                     Cancel
                                   </Button>
                                   <Button
                                     disabled={isUpdating}
                                     onClick={handleUpdateMovie}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                                    className="bg-blue-600 hover:bg-blue-700 text-foreground"
                                   >
                                     {isUpdating ? (
                                       <>
@@ -1254,25 +1270,25 @@ export default function AdminPage() {
                                 handleStatusChange(movie._id, value)
                               }
                             >
-                              <SelectTrigger className="w-[100px] h-8 bg-[#2a2d38] border-gray-600 text-white text-xs">
+                              <SelectTrigger className="w-[100px] h-8 dark:bg-[#2a2d38] dark:border-gray-600 text-foreground text-xs">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#2a2d38] border-gray-600">
+                              <SelectContent className="dark:bg-[#2a2d38] dark:border-gray-600">
                                 <SelectItem
                                   value="published"
-                                  className="text-white hover:bg-gray-700 text-xs"
+                                  className="text-foreground dark:hover:bg-gray-700 text-xs"
                                 >
                                   Publish
                                 </SelectItem>
                                 <SelectItem
                                   value="draft"
-                                  className="text-white hover:bg-gray-700 text-xs"
+                                  className="text-foreground dark:hover:bg-gray-700 text-xs"
                                 >
                                   Draft
                                 </SelectItem>
                                 <SelectItem
                                   value="archived"
-                                  className="text-white hover:bg-gray-700 text-xs"
+                                  className="text-foreground dark:hover:bg-gray-700 text-xs"
                                 >
                                   Archive
                                 </SelectItem>
@@ -1289,12 +1305,12 @@ export default function AdminPage() {
                                   <Trash2 className="h-3 w-3" />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent className="bg-[#1a1d23] border-gray-700 text-white">
+                              <AlertDialogContent className="dark:bg-[#1a1d23] dark:border-gray-700 text-foreground">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle className="text-white">
+                                  <AlertDialogTitle className="text-foreground">
                                     Delete Movie
                                   </AlertDialogTitle>
-                                  <AlertDialogDescription className="text-gray-300">
+                                  <AlertDialogDescription className="text-muted-foreground">
                                     Are you sure you want to delete &quot;
                                     {movie.title}&quot;? This action cannot be
                                     undone.
@@ -1303,7 +1319,7 @@ export default function AdminPage() {
                                 <AlertDialogFooter>
                                   <AlertDialogCancel
                                     disabled={isDeleting}
-                                    className="border-gray-600 text-white hover:bg-gray-700 bg-transparent"
+                                    className="border-gray-600 text-foreground dark:hover:bg-gray-700 bg-transparent"
                                   >
                                     Cancel
                                   </AlertDialogCancel>
@@ -1312,7 +1328,7 @@ export default function AdminPage() {
                                       handleDeleteMovie(movie._id, movie.title)
                                     }
                                     disabled={isDeleting}
-                                    className="bg-red-600 hover:bg-red-700 text-white flex items-center justify-center"
+                                    className="bg-red-600 hover:bg-red-700 text-foreground flex items-center justify-center"
                                   >
                                     {isDeleting ? (
                                       <>
@@ -1334,11 +1350,11 @@ export default function AdminPage() {
 
               {!isPending && filteredMovies?.length === 0 && (
                 <div className="text-center py-12">
-                  <Film className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-300 mb-2">
+                  <Film className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-muted-foreground mb-2">
                     No movies found
                   </h3>
-                  <p className="text-gray-500">
+                  <p className="text-muted-foreground">
                     Try adjusting your search or filter criteria.
                   </p>
                 </div>
@@ -1353,7 +1369,7 @@ export default function AdminPage() {
 
               {paginationStatus === "LoadingMore" && (
                 <div className="flex justify-center mt-10">
-                  <div className="flex items-center gap-2 text-gray-400">
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-6 w-6 animate-spin" />
                     <span>Loading more movies...</span>
                   </div>
@@ -1362,9 +1378,9 @@ export default function AdminPage() {
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
-              <Card className="bg-[#1a1d23] border-gray-700">
+              <Card className="dark:bg-[#1a1d23] dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-foreground flex items-center gap-2">
                     <BarChart3 className="h-5 w-5" />
                     Analytics Dashboard
                   </CardTitle>

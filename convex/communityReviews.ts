@@ -2,6 +2,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
+import { api } from "./_generated/api";
 
 export const getCommunityReviews = query({
   args: {
@@ -103,6 +104,13 @@ export const likeReview = mutation({
         likesCount: review.likesCount + 1,
         updatedAt: Date.now(),
       });
+
+      //send notification
+      await ctx.runMutation(api.notificationHelpers.notifyReviewLiked, {
+        likerId: userId,
+        reviewId: args.reviewId,
+      });
+
       return { liked: true, newCount: review.likesCount + 1 };
     }
   },
@@ -372,6 +380,14 @@ export const createCommunityReview = mutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+
+   
+        await ctx.runMutation(api.notificationHelpers.notifyNewReview, {
+          movieId: args.movieId,
+          reviewerId: user._id,
+          reviewId: reviewId,
+        });
+    
 
     return reviewId;
   },

@@ -97,18 +97,18 @@ export function AddMovieToListModal({
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="border-gray-700 bg-transparent text-gray-300 hover:bg-gray-800 hover:text-white"
+          className="dark:border-gray-700 bg-transparent dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Movies
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] bg-gray-900 border-gray-800 max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-[600px] dark:bg-gray-900 border-border dark:border-gray-800 max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle className="text-white text-xl">
+          <DialogTitle className="text-foreground text-xl">
             Add Movies to {listName}
           </DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription className="text-muted-foreground">
             Search for movies to add to your list
           </DialogDescription>
         </DialogHeader>
@@ -116,21 +116,21 @@ export function AddMovieToListModal({
         <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
           {/* Search Input */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search movies..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+              className="pl-10 dark:bg-gray-800 dark:border-gray-700 d text-foreground dark:placeholder:text-gray-500 "
             />
           </div>
 
           {/* Search Results */}
           <div className="flex-1 overflow-y-auto space-y-2 pr-2">
             {searchQuery.length < 2 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Search className="h-12 w-12 mx-auto mb-3 text-gray-600" />
+              <div className="text-center py-8 text-muted-foreground">
+                <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                 <p>Start typing to search for movies</p>
               </div>
             ) : isSearching ? (
@@ -138,8 +138,8 @@ export function AddMovieToListModal({
                 <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
               </div>
             ) : searchedMovies?.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Film className="h-12 w-12 mx-auto mb-3 text-gray-600" />
+              <div className="text-center py-8 text-muted-foreground">
+                <Film className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                 <p>No movies found</p>
               </div>
             ) : (
@@ -150,9 +150,9 @@ export function AddMovieToListModal({
                 return (
                   <div
                     key={movie.movieId}
-                    className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
+                    className="flex items-center gap-3 p-3 bg-muted dark:bg-gray-800/50 rounded-lg border border-border dark:border-gray-700 dark:hover:border-gray-600 transition-colors"
                   >
-                    <div className="w-12 h-16 bg-gray-700 rounded overflow-hidden flex-shrink-0">
+                    <div className="w-12 h-16 bg-card dark:bg-gray-700 rounded overflow-hidden flex-shrink-0">
                       {movie.posterUrl ? (
                         <img
                           src={movie.posterUrl}
@@ -161,12 +161,12 @@ export function AddMovieToListModal({
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Film className="h-6 w-6 text-gray-500" />
+                          <Film className="h-6 w-6 text-muted-foreground" />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-white font-medium truncate">
+                      <h4 className="text-foreground font-medium truncate">
                         {movie.title}
                       </h4>
                     </div>

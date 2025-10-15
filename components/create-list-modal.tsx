@@ -79,12 +79,12 @@ export function CreateListModal({ trigger }: CreateListModalProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-gray-900 border-gray-800">
+      <DialogContent className="sm:max-w-[500px] bg-card dark:bg-gray-900 dark:border-gray-800 border-border">
         <DialogHeader>
-          <DialogTitle className="text-white text-xl">
+          <DialogTitle className="text-foreground text-xl">
             Create New List
           </DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription className="text-muted-foreground">
             Organize your favorite movies into a custom collection
           </DialogDescription>
         </DialogHeader>
@@ -93,7 +93,7 @@ export function CreateListModal({ trigger }: CreateListModalProps) {
           <div className="space-y-2">
             <Label
               htmlFor="list-name"
-              className="text-white text-sm font-medium"
+              className="text-foreground text-sm font-medium"
             >
               List Name
             </Label>
@@ -102,7 +102,7 @@ export function CreateListModal({ trigger }: CreateListModalProps) {
               placeholder="e.g., Summer Blockbusters"
               value={listName}
               onChange={(e) => setListName(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+              className="dark:bg-gray-800 border-border dark:border-gray-700 text-foreground placeholder:text-gray-500 focus:border-blue-500"
               disabled={isCreating}
             />
           </div>
@@ -110,7 +110,7 @@ export function CreateListModal({ trigger }: CreateListModalProps) {
           <div className="space-y-2">
             <Label
               htmlFor="description"
-              className="text-white text-sm font-medium"
+              className="text-foreground text-sm font-medium"
             >
               Description (Optional)
             </Label>
@@ -119,7 +119,7 @@ export function CreateListModal({ trigger }: CreateListModalProps) {
               placeholder="Add a description for your list..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500 min-h-[100px] resize-none"
+              className="dark:bg-gray-800 border-border dark:border-gray-700 text-foreground placeholder-muted-foreground dark:placeholder:text-gray-500 focus:border-blue-500 min-h-[100px] resize-none"
               disabled={isCreating}
             />
           </div>

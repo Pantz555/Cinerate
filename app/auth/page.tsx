@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -25,16 +25,26 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
 
 export default function AuthPage() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuthActions();
+
+  const emailParam = searchParams.get("email") || "";
+  const [email, setEmail] = useState(emailParam);
+
+  useEffect(() => {
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+  }, [emailParam]);
 
   // Function to map errors to human-readable messages
   const getFriendlyErrorMessage = (error: any): string => {
@@ -97,38 +107,38 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background dark:bg-[#0a0a0a] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Back to Home Button */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to CineRate
         </Link>
 
-        <Card className="bg-[#1a1a1a] border-gray-800">
+        <Card className="bg-card dark:bg-[#1a1a1a] dark:border-gray-800">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-white">
+            <CardTitle className="text-2xl font-bold text-foreground">
               Welcome to CineRate
             </CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription className="text-muted-foreground">
               Join the community and start rating movies
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-[#2a2a2a]">
+              <TabsList className="grid w-full grid-cols-2 bg-secondary dark:bg-[#2a2a2a]">
                 <TabsTrigger
                   value="signin"
-                  className="text-gray-300 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:text-white transition-colors"
+                  className="text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover:text-foreground transition-colors"
                 >
                   Sign In
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="text-gray-300 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:text-white transition-colors"
+                  className="text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover:text-foreground transition-colors"
                 >
                   Sign Up
                 </TabsTrigger>
@@ -138,41 +148,46 @@ export default function AuthPage() {
               <TabsContent value="signin" className="space-y-4 mt-6">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email" className="text-white">
+                    <Label htmlFor="signin-email" className="text-foreground">
                       Email
                     </Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         id="signin-email"
                         type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)} //
                         placeholder="Enter your email"
-                        className="pl-10 bg-[#2a2a2a] border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 dark:bg-[#2a2a2a] dark:dark:border-gray-700 text-foreground dark:dark:placeholder:text-gray-500 focus:border-blue-500"
                         required
                       />
                     </div>
-                    <p className="text-white text-sm">
+                    <p className="text-foreground text-sm">
                       Admin email: admin@gmail.com
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password" className="text-white">
+                    <Label
+                      htmlFor="signin-password"
+                      className="text-foreground"
+                    >
                       Password
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         id="signin-password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
-                        className="pl-10 pr-10 bg-[#2a2a2a] border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 pr-10 dark:bg-[#2a2a2a] dark:dark:border-gray-700 text-foreground dark:dark:placeholder:text-gray-500 focus:border-blue-500"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       >
                         {showPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -181,16 +196,16 @@ export default function AuthPage() {
                         )}
                       </button>
                     </div>
-                    <p className="text-white text-sm">
+                    <p className="text-foreground text-sm">
                       Admin password: admin@123
                     </p>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <label className="flex items-center space-x-2 text-sm text-gray-400">
+                    <label className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <input
                         type="checkbox"
-                        className="rounded border-gray-700 bg-[#2a2a2a]"
+                        className="rounded border-border bg-secondary"
                       />
                       <span>Remember me</span>
                     </label>
@@ -220,10 +235,10 @@ export default function AuthPage() {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-700" />
+                    <span className="w-full border-t dark:border-gray-700" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-[#1a1a1a] px-2 text-white">
+                    <span className="bg-card dark:bg-[#1a1a1a] px-2 text-muted-foreground">
                       Or continue with
                     </span>
                   </div>
@@ -232,7 +247,7 @@ export default function AuthPage() {
                 <Button
                   onClick={() => void signIn("google")}
                   variant="outline"
-                  className="border-gray-700 bg-[#2a2a2a] text-white hover:bg-[#3a3a3a] w-full hover:text-white"
+                  className="border-border w-full bg-secondary text-foreground hover:bg-accent"
                 >
                   <Image
                     src="/google.png"
@@ -249,54 +264,59 @@ export default function AuthPage() {
               <TabsContent value="signup" className="space-y-4 mt-6">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name" className="text-white">
+                    <Label htmlFor="signup-name" className="text-foreground">
                       Full Name
                     </Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         id="signup-name"
                         type="text"
                         placeholder="Enter your full name"
-                        className="pl-10 bg-[#2a2a2a] border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 dark:bg-[#2a2a2a] dark:dark:border-gray-700 text-foreground dark:placeholder:text-gray-500 focus:border-blue-500"
                         required
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-white">
+                    <Label htmlFor="signup-email" className="text-foreground">
                       Email
                     </Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         id="signup-email"
                         type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your email"
-                        className="pl-10 bg-[#2a2a2a] border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 dark:bg-[#2a2a2a] dark:border-gray-700 text-foreground dark:placeholder:text-gray-500 focus:border-blue-500"
                         required
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-white">
+                    <Label
+                      htmlFor="signup-password"
+                      className="text-foreground"
+                    >
                       Password
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         id="signup-password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Create a password"
-                        className="pl-10 pr-10 bg-[#2a2a2a] border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 pr-10 dark:bg-[#2a2a2a] dark:border-gray-700 text-foreground dark:placeholder:text-gray-500 focus:border-blue-500"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       >
                         {showPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -310,17 +330,17 @@ export default function AuthPage() {
                   <div className="space-y-2">
                     <Label
                       htmlFor="signup-confirm-password"
-                      className="text-white"
+                      className="text-foreground"
                     >
                       Confirm Password
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         id="signup-confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm your password"
-                        className="pl-10 pr-10 bg-[#2a2a2a] border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 pr-10 dark:bg-[#2a2a2a] dark:border-gray-700 text-foreground dark:placeholder:text-gray-500 focus:border-blue-500"
                         required
                       />
                       <button
@@ -328,7 +348,7 @@ export default function AuthPage() {
                         onClick={() =>
                           setShowConfirmPassword(!showConfirmPassword)
                         }
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -343,10 +363,13 @@ export default function AuthPage() {
                     <input
                       type="checkbox"
                       id="terms"
-                      className="rounded border-gray-700 bg-[#2a2a2a]"
+                      className="rounded dark:border-gray-700 dark:bg-[#2a2a2a]"
                       required
                     />
-                    <label htmlFor="terms" className="text-sm text-gray-400">
+                    <label
+                      htmlFor="terms"
+                      className="text-sm text-muted-foreground"
+                    >
                       I agree to the{" "}
                       <Link
                         href="/terms"
@@ -382,10 +405,10 @@ export default function AuthPage() {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-700" />
+                    <span className="w-full border-t dark:border-gray-700" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-[#1a1a1a] px-2 text-white">
+                    <span className="bg-card px-2 text-muted-foreground">
                       Or continue with
                     </span>
                   </div>
@@ -393,7 +416,7 @@ export default function AuthPage() {
 
                 <Button
                   variant="outline"
-                  className="border-gray-700 bg-[#2a2a2a] text-white hover:bg-[#3a3a3a] w-full hover:text-white"
+                  className="border-border w-full bg-secondary text-foreground hover:bg-accent"
                   onClick={() => void signIn("google")}
                 >
                   <Image
@@ -410,7 +433,7 @@ export default function AuthPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           By signing up, you agree to our Terms of Service and Privacy Policy
         </p>
       </div>

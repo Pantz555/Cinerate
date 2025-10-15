@@ -49,7 +49,7 @@ export function StarRating({
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h3 className="text-lg font-semibold text-white">{label}</h3>
+      <h3 className="text-lg font-semibold">{label}</h3>
       <div
         className="star-rating flex flex-row-reverse justify-end gap-1"
         onMouseLeave={handleMouseLeave}

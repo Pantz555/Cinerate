@@ -1,6 +1,7 @@
 "use client";
 
 import { Header } from "@/components/header";
+import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery, usePaginatedQuery } from "convex/react";
@@ -118,74 +119,74 @@ export default function CommunityPage() {
     <div className="relative flex min-h-screen w-full flex-col">
       <Header />
       <div className="flex flex-1">
-        <aside className="sticky top-[65px] hidden h-[calc(100vh-65px)] w-64 flex-col border-r border-[#292d38] p-4 lg:flex">
+        <aside className="sticky top-[65px] hidden h-[calc(100vh-65px)] w-64 flex-col border-r border-border dark:border-[#292d38] p-4 lg:flex">
           <nav className="flex flex-1 flex-col gap-1">
             <Link
-              className="flex items-center gap-3 rounded-md bg-[#292d38] px-3 py-2 text-sm font-semibold text-white"
+              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium dark:text-gray-300 text-muted-foreground transition-colors hover:bg-muted dark:hover:bg-[#292d38] dark:hover:text-white"
               href="/"
             >
               <span className="text-xl">🏠</span>
               Home
             </Link>
-            <a
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-[#292d38] hover:text-white"
+            <Link
+              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium dark:text-gray-300 text-muted-foreground transition-colors hover:bg-muted dark:hover:bg-[#292d38] dark:hover:text-white"
               href="/discover"
             >
               <span className="text-xl">🔍</span>
               Explore
-            </a>
-            <a
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-[#292d38] hover:text-white"
+            </Link>
+            <Link
+              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium dark:text-gray-300 text-muted-foreground transition-colors hover:bg-muted dark:hover:bg-[#292d38] dark:hover:text-white"
               href="/lists"
             >
               <span className="text-xl">📋</span>
               Lists
-            </a>
-            <a
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-[#292d38] hover:text-white"
+            </Link>
+            <Link
+              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium dark:text-gray-300 text-muted-foreground transition-colors hover:bg-muted dark:hover:bg-[#292d38] dark:hover:text-white"
               href="/reviews"
             >
               <span className="text-xl">🎬</span>
               Reviews
-            </a>
-            <a
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-[#292d38] hover:text-white"
+            </Link>
+            <Link
+              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium dark:text-gray-300 text-muted-foreground transition-colors hover:bg-muted dark:hover:bg-[#292d38] dark:hover:text-white"
               href="/watchlist"
             >
               <span className="text-xl">🔖</span>
               Watchlist
-            </a>
+            </Link>
           </nav>
           <div className="mt-auto">
-            <a
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-[#292d38] hover:text-white"
+            <Link
+              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium dark:text-gray-300 text-muted-foreground transition-colors hover:bg-muted dark:hover:bg-[#292d38] dark:hover:text-white"
               href="/settings"
             >
               <span className="text-xl">⚙️</span>
               Settings
-            </a>
+            </Link>
           </div>
         </aside>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-4xl">
-            <h1 className="text-3xl font-bold tracking-tight text-white">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               Community Feed
             </h1>
 
             {/* Hot Movies Section */}
             {hotMovies === undefined ? (
               <section className="mt-8">
-                <h2 className="mb-4 text-xl font-bold tracking-tight text-white">
+                <h2 className="mb-4 text-xl font-bold tracking-tight text-foreground">
                   🔥 Hot Movies
                 </h2>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                   {Array.from({ length: 5 }).map((_, index) => (
                     <div key={index} className="flex flex-col gap-3">
-                      <div className="aspect-[2/3] w-full animate-pulse rounded-md bg-[#292d38]"></div>
+                      <div className="aspect-[2/3] w-full animate-pulse rounded-md bg-muted dark:bg-[#292d38]"></div>
                       <div className="space-y-1">
-                        <div className="h-3 w-3/4 animate-pulse rounded bg-[#292d38]"></div>
-                        <div className="h-2 w-1/2 animate-pulse rounded bg-[#292d38]"></div>
+                        <div className="h-3 w-3/4 animate-pulse rounded bg-muted dark:bg-[#292d38]"></div>
+                        <div className="h-2 w-1/2 animate-pulse rounded bg-muted dark:bg-[#292d38]"></div>
                       </div>
                     </div>
                   ))}
@@ -193,7 +194,7 @@ export default function CommunityPage() {
               </section>
             ) : (
               <section className="mt-8">
-                <h2 className="mb-4 text-xl font-bold tracking-tight text-white">
+                <h2 className="mb-4 text-xl font-bold tracking-tight text-foreground">
                   🔥 Hot Movies
                 </h2>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -203,7 +204,7 @@ export default function CommunityPage() {
                         key={movie._id}
                         className="group flex cursor-pointer flex-col gap-3"
                       >
-                        <div className="relative w-full overflow-hidden rounded-md bg-[#292d38] shadow-lg transition-transform group-hover:scale-105">
+                        <div className="relative w-full overflow-hidden rounded-md dark:bg-[#292d38] bg-muted shadow-lg transition-transform group-hover:scale-105">
                           <div
                             className="aspect-[2/3] w-full bg-cover bg-center bg-no-repeat"
                             style={{
@@ -214,17 +215,19 @@ export default function CommunityPage() {
                           ></div>
                         </div>
                         <div>
-                          <p className="truncate text-sm font-semibold text-white">
+                          <p className="truncate text-sm font-semibold text-foreground">
                             {movie.title}
                           </p>
-                          <p className="text-xs text-[#9ea4b7]">
+                          <p className="text-xs text-muted-foreground">
                             {movie.genre}
                           </p>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-400">No hot movies at the moment</p>
+                    <p className="text-muted-foreground">
+                      No hot movies at the moment
+                    </p>
                   )}
                 </div>
               </section>
@@ -234,7 +237,7 @@ export default function CommunityPage() {
             <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-3">
               {/* Community Reviews */}
               <section className="md:col-span-2">
-                <h2 className="mb-4 text-xl font-bold tracking-tight text-white">
+                <h2 className="mb-4 text-xl font-bold tracking-tight text-foreground">
                   Community Reviews
                 </h2>
 
@@ -243,15 +246,15 @@ export default function CommunityPage() {
                     {[1, 2, 3].map((i) => (
                       <div
                         key={i}
-                        className="rounded-md border border-[#292d38] p-4"
+                        className="rounded-md border border-border dark:border-[#292d38] p-4"
                       >
                         <div className="animate-pulse">
                           <div className="flex items-start gap-4">
-                            <div className="h-10 w-10 rounded-full bg-[#292d38]"></div>
+                            <div className="h-10 w-10 rounded-full bg-muted dark:bg-[#292d38]"></div>
                             <div className="flex-1 space-y-2">
-                              <div className="h-4 w-24 bg-[#292d38] rounded"></div>
-                              <div className="h-3 w-full bg-[#292d38] rounded"></div>
-                              <div className="h-3 w-3/4 bg-[#292d38] rounded"></div>
+                              <div className="h-4 w-24 bg-muted dark:bg-[#292d38] rounded"></div>
+                              <div className="h-3 w-full bg-muted dark:bg-[#292d38] rounded"></div>
+                              <div className="h-3 w-3/4 bg-muted dark:bg-[#292d38] rounded"></div>
                             </div>
                           </div>
                         </div>
@@ -268,11 +271,11 @@ export default function CommunityPage() {
                       return (
                         <div
                           key={review._id}
-                          className="rounded-md border border-[#292d38] p-4"
+                          className="rounded-md border border-border dark:border-[#292d38] p-4"
                         >
                           <div className="flex items-start gap-4">
                             <div
-                              className="size-10 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
+                              className="size-10 shrink-0 rounded-full bg-gray-200 dark:bg-[#292d38] bg-cover bg-center bg-no-repeat"
                               style={{
                                 backgroundImage: review.user.image
                                   ? `url("${review.user.image || "/user.png"}")`
@@ -280,7 +283,7 @@ export default function CommunityPage() {
                               }}
                             >
                               {!review.user.image && (
-                                <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-white">
+                                <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-foreground">
                                   {review.user.name?.charAt(0)?.toUpperCase() ||
                                     "A"}
                                 </div>
@@ -288,10 +291,10 @@ export default function CommunityPage() {
                             </div>
                             <div className="flex-1">
                               <div className="flex items-baseline gap-2">
-                                <p className="text-sm font-semibold text-white">
+                                <p className="text-sm font-semibold text-foreground">
                                   {review.user.name}
                                 </p>
-                                <p className="text-xs text-[#9ea4b7]">
+                                <p className="text-xs text-muted-foreground">
                                   {formatTimeAgo(review.createdAt)}
                                 </p>
                                 {review.movie.title && (
@@ -303,7 +306,7 @@ export default function CommunityPage() {
                                   </Link>
                                 )}
                                 {review.isEdited && (
-                                  <p className="text-xs text-gray-500">
+                                  <p className="text-xs text-muted-foreground">
                                     · edited
                                   </p>
                                 )}
@@ -311,7 +314,7 @@ export default function CommunityPage() {
 
                               {/* Review title and rating */}
                               <div className="mt-1 flex items-center gap-2">
-                                <h3 className="text-sm font-medium text-white">
+                                <h3 className="text-sm font-medium text-foreground">
                                   {review.title}
                                 </h3>
                                 <div className="flex items-center gap-1">
@@ -322,21 +325,21 @@ export default function CommunityPage() {
                                 </div>
                               </div>
 
-                              <p className="mt-2 text-sm text-gray-300">
+                              <p className="mt-2 text-sm text-muted-foreground">
                                 {review.content}
                               </p>
 
                               {review.spoilerWarning && (
                                 <div className="mt-2">
-                                  <span className="rounded bg-red-600 px-2 py-1 text-xs text-white">
+                                  <span className="rounded bg-red-600 px-2 py-1 text-xs text-foreground">
                                     Contains Spoilers
                                   </span>
                                 </div>
                               )}
 
-                              <div className="mt-3 flex items-center gap-4 text-xs text-[#9ea4b7]">
+                              <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
                                 <button
-                                  className={`flex items-center gap-1 transition-colors hover:text-white ${
+                                  className={`flex items-center gap-1 transition-colors hover:text-foreground ${
                                     isLiked ? "text-blue-600" : ""
                                   }`}
                                   onClick={() => handleLike(review._id)}
@@ -347,14 +350,14 @@ export default function CommunityPage() {
                                   {review.likesCount}
                                 </button>
                                 <button
-                                  className="flex items-center gap-1 transition-colors hover:text-white"
+                                  className="flex items-center gap-1 transition-colors hover:text-foreground"
                                   onClick={() => toggleReplies(review._id)}
                                 >
                                   <MessageCircle className="h-4 w-4" />
                                   {review.repliesCount}
                                 </button>
                                 <button
-                                  className="flex items-center gap-1 transition-colors hover:text-white"
+                                  className="flex items-center gap-1 transition-colors hover:text-foreground"
                                   onClick={() =>
                                     setShowReplyForm(
                                       showReplyForm === review._id
@@ -365,7 +368,7 @@ export default function CommunityPage() {
                                 >
                                   Reply
                                 </button>
-                                <button className="flex items-center gap-1 transition-colors hover:text-white">
+                                <button className="flex items-center gap-1 transition-colors hover:text-foreground">
                                   <Share className="h-4 w-4" />
                                 </button>
                               </div>
@@ -374,14 +377,14 @@ export default function CommunityPage() {
 
                           {/* Existing Replies */}
                           {repliesExpanded && replies.length > 0 && (
-                            <div className="mt-4 ml-14 space-y-3 border-l border-[#292d38] pl-4">
+                            <div className="mt-4 ml-14 space-y-3 border-l border-border dark:border-[#292d38] pl-4">
                               {replies.map((reply) => (
                                 <div
                                   key={reply._id}
                                   className="flex items-start gap-3"
                                 >
                                   <div
-                                    className="size-8 shrink-0 rounded-full bg-[#292d38] bg-cover bg-center bg-no-repeat"
+                                    className="size-8 shrink-0 rounded-full bg-gray-200 dark:bg-[#292d38] bg-cover bg-center bg-no-repeat"
                                     style={{
                                       backgroundImage: reply.user.image
                                         ? `url("${reply.user.image}")`
@@ -389,7 +392,7 @@ export default function CommunityPage() {
                                     }}
                                   >
                                     {!reply.user.image && (
-                                      <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+                                      <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-foreground">
                                         {reply.user.name
                                           ?.charAt(0)
                                           ?.toUpperCase() || "A"}
@@ -398,19 +401,19 @@ export default function CommunityPage() {
                                   </div>
                                   <div className="flex-1">
                                     <div className="flex items-baseline gap-2">
-                                      <p className="text-xs font-semibold text-white">
+                                      <p className="text-xs font-semibold text-foreground">
                                         {reply.user.name}
                                       </p>
-                                      <p className="text-xs text-[#9ea4b7]">
+                                      <p className="text-xs text-muted-foreground">
                                         {formatTimeAgo(reply.createdAt)}
                                       </p>
                                       {reply.isEdited && (
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-muted-foreground">
                                           · edited
                                         </p>
                                       )}
                                     </div>
-                                    <p className="mt-1 text-xs text-gray-300">
+                                    <p className="mt-1 text-xs text-foreground">
                                       {reply.content}
                                     </p>
                                   </div>
@@ -423,7 +426,7 @@ export default function CommunityPage() {
                           {showReplyForm === review._id && (
                             <div className="mt-4 ml-14">
                               <div className="flex gap-3">
-                                <div className="size-8 shrink-0 rounded-full bg-[#292d38]"></div>
+                                <div className="size-8 shrink-0 rounded-full  dark:bg-[#292d38]"></div>
                                 <div className="flex-1">
                                   <textarea
                                     value={replyText}
@@ -431,12 +434,12 @@ export default function CommunityPage() {
                                       setReplyText(e.target.value)
                                     }
                                     placeholder="Write a reply..."
-                                    className="w-full resize-none rounded-md border border-[#292d38] bg-[#1a1d23] p-2 text-sm text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                                    className="w-full resize-none rounded-md border border-border dark:border-[#292d38] dark:bg-[#1a1d23] p-2 text-sm text-foreground dark:placeholder-gray-400 placeholder-muted-foreground focus:border-blue-500 focus:outline-none"
                                     rows={2}
                                     maxLength={1000}
                                   />
                                   <div className="mt-2 flex items-center justify-between">
-                                    <span className="text-xs text-gray-500">
+                                    <span className="text-xs text-muted-foreground">
                                       {replyText.length}/1000
                                     </span>
                                     <div className="flex gap-2">
@@ -445,7 +448,7 @@ export default function CommunityPage() {
                                           setShowReplyForm(null);
                                           setReplyText("");
                                         }}
-                                        className="px-3 py-1 text-xs text-gray-400 hover:text-white"
+                                        className="px-3 py-1 text-xs text-muted-foreground hover:opacity-90"
                                       >
                                         Cancel
                                       </button>
@@ -454,7 +457,7 @@ export default function CommunityPage() {
                                           handleReplySubmit(review._id)
                                         }
                                         disabled={!replyText.trim()}
-                                        className="flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 disabled:opacity-50"
+                                        className="flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1 text-xs text-muted hover:bg-blue-700 disabled:opacity-50"
                                       >
                                         <Send className="h-3 w-3" />
                                         Reply
@@ -472,18 +475,15 @@ export default function CommunityPage() {
                     {/* Load More Button */}
                     {status === "CanLoadMore" && (
                       <div className="flex justify-center">
-                        <button
-                          onClick={() => loadMore(5)}
-                          className="rounded-md bg-[#292d38] px-4 py-2 text-sm text-white hover:bg-[#3a3f4a]"
-                        >
+                        <Button onClick={() => loadMore(5)}>
                           Load More Reviews
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-gray-400">
+                    <p className="text-muted-foreground">
                       No reviews found. Be the first to write one!
                     </p>
                   </div>
@@ -492,14 +492,14 @@ export default function CommunityPage() {
 
               {/* Recent Activity Sidebar */}
               <aside className="md:col-span-1">
-                <h2 className="mb-4 text-xl font-bold tracking-tight text-white">
+                <h2 className="mb-4 text-xl font-bold tracking-tight text-foreground">
                   Recent Activity
                 </h2>
                 <div className="flex flex-col gap-4">
                   {recentActivity
                     ? recentActivity.map((activity, index) => (
                         <div key={index} className="flex items-center gap-4">
-                          <div className="w-12 shrink-0 overflow-hidden rounded-md bg-[#292d38]">
+                          <div className="w-12 shrink-0 overflow-hidden rounded-md bg-muted dark:bg-[#292d38]">
                             <div
                               className="aspect-[2/3] w-full bg-cover bg-center bg-no-repeat"
                               style={{
@@ -512,11 +512,11 @@ export default function CommunityPage() {
                           <div>
                             <Link
                               href={`/movie/${activity.movieId}`}
-                              className="truncate text-sm font-semibold text-white hover:text-blue-500 transition-all duration-300"
+                              className="truncate text-sm font-semibold text-foreground hover:text-blue-500 transition-all duration-300"
                             >
                               {activity.title}
                             </Link>
-                            <p className="text-xs text-[#9ea4b7]">
+                            <p className="text-xs text-muted-foreground">
                               <Star className="inline h-3 w-3 fill-yellow-400 text-yellow-400" />{" "}
                               Rated {activity.rating}/5
                             </p>
@@ -526,10 +526,10 @@ export default function CommunityPage() {
                     : // Loading skeleton
                       Array.from({ length: 5 }).map((_, index) => (
                         <div key={index} className="flex items-center gap-4">
-                          <div className="w-12 h-16 shrink-0 animate-pulse rounded-md bg-[#292d38]"></div>
+                          <div className="w-12 h-16 shrink-0 animate-pulse rounded-md bg-muted dark:bg-[#292d38]"></div>
                           <div className="space-y-2 flex-1">
-                            <div className="h-3 w-3/4 animate-pulse rounded bg-[#292d38]"></div>
-                            <div className="h-2 w-1/2 animate-pulse rounded bg-[#292d38]"></div>
+                            <div className="h-3 w-3/4 animate-pulse rounded bg-muted dark:bg-[#292d38]"></div>
+                            <div className="h-2 w-1/2 animate-pulse rounded bg-muted dark:bg-[#292d38]"></div>
                           </div>
                         </div>
                       ))}

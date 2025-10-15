@@ -137,6 +137,81 @@ export default defineSchema({
     lastRatingDate: v.optional(v.number()),
   }).index("email", ["email"]),
 
+  // User Settings
+  userSettings: defineTable({
+    userId: v.id("users"),
+    notifications: v.object({
+      emailNotifications: v.boolean(),
+      newReviews: v.boolean(),
+      ratingResponses: v.boolean(),
+      weeklyDigest: v.boolean(),
+      trendingMovies: v.boolean(),
+      recommendations: v.boolean(),
+      communityActivity: v.boolean(),
+      achievements: v.boolean(),
+    }),
+    privacy: v.optional(
+      v.object({
+        profileVisibility: v.union(
+          v.literal("public"),
+          v.literal("friends"),
+          v.literal("private"),
+        ),
+        showRatings: v.boolean(),
+        showLists: v.boolean(),
+      }),
+    ),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  // Notifications
+  notifications: defineTable({
+    userId: v.id("users"),
+    type: v.union(
+      v.literal("new_review"),
+      v.literal("rating_response"),
+      v.literal("review_like"),
+      v.literal("comment_reply"),
+      v.literal("new_follower"),
+      v.literal("achievement_unlocked"),
+      v.literal("trending_movie"),
+      v.literal("recommendation"),
+      v.literal("movie_updated"),
+      v.literal("movie_deleted"),
+    ),
+    actorId: v.optional(v.id("users")),
+    actorName: v.optional(v.string()),
+    actorImage: v.optional(v.string()),
+    action: v.string(),
+    target: v.string(),
+    targetId: v.optional(v.string()),
+    targetType: v.optional(
+      v.union(
+        v.literal("movie"),
+        v.literal("review"),
+        v.literal("comment"),
+        v.literal("user"),
+        v.literal("achievement"),
+      ),
+    ),
+    metadata: v.optional(
+      v.object({
+        movieTitle: v.optional(v.string()),
+        movieId: v.optional(v.id("movies")),
+        reviewId: v.optional(v.id("communityReviews")),
+        commentId: v.optional(v.id("movieComments")),
+        achievementTitle: v.optional(v.string()),
+        posterUrl: v.optional(v.string()),
+      }),
+    ),
+    isRead: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_unread", ["userId", "isRead"])
+    .index("by_user_created", ["userId", "createdAt"])
+    .index("by_type", ["type"]),
+
   // Multi-dimensional ratings
   ratings: defineTable({
     userId: v.id("users"),
