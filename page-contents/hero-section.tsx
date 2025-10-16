@@ -14,6 +14,7 @@ const HeroSection = () => {
   const { data: isAuthenticated, isPending } = useQueryWithStatus(
     api.auth.isAuthenticated,
   );
+
   const { data, isPending: featuredLoading } = useQueryWithStatus(
     api.movies.getMoviesWithFilters,
     {

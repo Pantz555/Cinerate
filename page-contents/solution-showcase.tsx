@@ -25,6 +25,7 @@ import { useQueryWithStatus } from "@/components/ConvexClientProvider";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { loggedInUser } from "@/convex/auth";
 
 const SolutionShowcase = () => {
   const router = useRouter();
@@ -42,6 +43,7 @@ const SolutionShowcase = () => {
   const [emailError, setEmailError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitRating = useMutation(api.ratings.submitRating);
+  const { data: user } = useQueryWithStatus(api.auth.loggedInUser);
 
   const { data, isPending: featuredLoading } = useQueryWithStatus(
     api.movies.getMoviesWithFilters,
@@ -68,7 +70,8 @@ const SolutionShowcase = () => {
     // If user has existing rating in DB, use that
     if (
       existingRating?.ratings &&
-      existingRating.movieId === featuredMovie?._id
+      existingRating.movieId === featuredMovie?._id &&
+      existingRating.userId === user?._id
     ) {
       setUserRatings(existingRating.ratings);
       return;
@@ -282,7 +285,7 @@ const SolutionShowcase = () => {
       localStorage.removeItem("signup_source");
 
       // PRD: Redirect after submission
-      router.push(`/movie/${featuredMovie._id}/rate`)
+      router.push(`/movie/${featuredMovie._id}/rate`);
     } catch (error) {
       console.error("Failed to submit rating:", error);
       // PRD: Error message format
