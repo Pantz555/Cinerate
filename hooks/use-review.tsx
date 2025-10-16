@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
@@ -30,27 +30,72 @@ export function useReview(movieId: Id<"movies">) {
   const [isPublicReview, setIsPublicReview] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasLoadedRatings, setHasLoadedRatings] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Check if coming from demo (as per PRD redirect flow)
+  const fromDemo = searchParams.get("from") === "demo";
+  const shouldPrefill = searchParams.get("prefill") === "true";
 
   // Queries
   const { data: user } = useQueryWithStatus(api.auth.loggedInUser);
-  const { data: existingRating } = useQuery(api.ratings.getUserRating, {
-    movieId,
-  });
+  const { data: existingRating, isPending: ratingLoading } = useQuery(
+    api.ratings.getUserRating,
+    { movieId }
+  );
 
   // Mutations
   const submitRating = useMutation(api.ratings.submitRating);
 
-  // Load existing rating
+  // Load ratings (Priority: DB rating > localStorage demo rating)
   useEffect(() => {
+    if (hasLoadedRatings || ratingLoading) return;
+
+    // Priority 1: Existing rating in database (PRD: user already rated)
     if (existingRating) {
       setRatings(existingRating.ratings);
       setReview(existingRating.review || "");
+      setHasLoadedRatings(true);
+      return;
     }
-  }, [existingRating]);
 
-  // Track online/offline
+    // Priority 2: Demo rating from localStorage (PRD: pre-fill after sign-up)
+    if (fromDemo && shouldPrefill) {
+      const demoRating = localStorage.getItem("demo_rating_inception");
+      if (demoRating) {
+        try {
+          const parsed = JSON.parse(demoRating);
+          
+          // Verify it's for the correct movie
+          if (parsed.ratings && parsed.movieId === movieId) {
+            setRatings(parsed.ratings);
+            setHasLoadedRatings(true);
+            
+            // Show confirmation message (PRD: "We saved your rating from the demo!")
+            toast.success("We saved your rating from the demo! Submit to make it official.", {
+              duration: 5000,
+            });
+            
+            // Clean up URL parameters
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete("from");
+            newUrl.searchParams.delete("prefill");
+            window.history.replaceState({}, "", newUrl.toString());
+            
+            return;
+          }
+        } catch (e) {
+          console.error("Failed to parse demo rating:", e);
+        }
+      }
+    }
+
+    setHasLoadedRatings(true);
+  }, [existingRating, ratingLoading, hasLoadedRatings, fromDemo, shouldPrefill, movieId]);
+
+  // Track online/offline (PRD: Handle network errors)
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -65,7 +110,7 @@ export function useReview(movieId: Id<"movies">) {
     };
   }, []);
 
-  // Confetti animation
+  // Confetti animation (PRD success feedback)
   const celebrate = () => {
     const defaults = {
       spread: 360,
@@ -102,11 +147,19 @@ export function useReview(movieId: Id<"movies">) {
   const handleReviewChange = (value: string) => setReview(value);
 
   const handleSubmit = async () => {
-    if (!isOnline)
-      return toast.error("Please check your connection and try again.");
-    if (!user?._id) return toast.error("Please login to review!");
+    // PRD: Network error handling
+    if (!isOnline) {
+      toast.error("Please check your connection and try again.");
+      return;
+    }
+    
+    if (!user?._id) {
+      toast.error("Please login to review!");
+      return;
+    }
 
     setIsSubmitting(true);
+    
     try {
       await submitRating({
         movieId,
@@ -115,13 +168,21 @@ export function useReview(movieId: Id<"movies">) {
         isPublicReview,
       });
 
+      // PRD: Success feedback
       toast.success("Rating submitted successfully!");
       celebrate();
 
+      // PRD: Clear demo data after successful submission
+      localStorage.removeItem("demo_rating_inception");
+      sessionStorage.removeItem("demo_prompt_shown");
+      localStorage.removeItem("signup_source");
+
+      // PRD: Redirect after submission
       setTimeout(() => router.push(`/movie/${movieId}`), 1000);
     } catch (error) {
       console.error("Failed to submit rating:", error);
-      toast.error("Error submitting rating");
+      // PRD: Error message format
+      toast.error("Oops! Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -151,6 +212,7 @@ export function useReview(movieId: Id<"movies">) {
     isSubmitting,
     existingRating,
     hasRatings,
+    isLoading: ratingLoading,
 
     // Handlers
     handleRatingChange,

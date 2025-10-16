@@ -3,9 +3,16 @@ import { convexAuth, getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
 import Google from "@auth/core/providers/google";
 import { v } from "convex/values";
+import Resend from "@auth/core/providers/resend";
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [Password, Google],
+  providers: [
+    Password,
+    Google,
+    Resend({
+      from: process.env.AUTH_EMAIL ?? "My App <onboarding@resend.dev>",
+    }),
+  ],
 });
 
 export const loggedInUser = query({

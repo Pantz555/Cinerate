@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { useDebouncedValue } from "@mantine/hooks";
 import { StructuredMovies } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -117,9 +118,16 @@ export function Header() {
           {searchQuery && (
             <div className="absolute top-full right-0 mt-2 w-80 bg-background border border-border rounded-lg shadow-lg p-2 max-h-80 overflow-y-auto">
               {isSearching && (
-                <div className="flex justify-center items-center py-4 text-muted-foreground">
-                  <Loader2 className="animate-spin h-5 w-5 mr-2" />
-                  Searching...
+                <div className="space-y-3 py-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-2">
+                      <Skeleton className="w-10 h-14 rounded" />
+                      <div className="flex flex-col gap-2">
+                        <Skeleton className="h-4 w-40" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
 

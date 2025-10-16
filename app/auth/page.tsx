@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -22,6 +21,7 @@ import {
   User,
   ArrowLeft,
   Loader2,
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -35,34 +35,33 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSendingLink, setIsSendingLink] = useState(false);
   const { signIn } = useAuthActions();
 
   const emailParam = searchParams.get("email") || "";
   const [email, setEmail] = useState(emailParam);
 
   useEffect(() => {
-    if (emailParam) {
-      setEmail(emailParam);
-    }
+    if (emailParam) setEmail(emailParam);
   }, [emailParam]);
 
-  // Function to map errors to human-readable messages
+  const validateEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
   const getFriendlyErrorMessage = (error: any): string => {
     if (error instanceof Error) {
-      // Handle specific Convex Auth errors
       if (error.message.includes("InvalidAccountId")) {
-        return "Invalid email or password. Please try again.";
+        return "Invalid email or password.";
       }
       if (error.message.includes("AccountNotFound")) {
-        return "No account found with this email. Please sign up.";
+        return "No account found with this email.";
       }
       if (error.message.includes("InvalidCredentials")) {
-        return "Incorrect password. Please try again.";
+        return "Incorrect password.";
       }
-      // Add more specific error mappings as needed
-      return error.message || "An unexpected error occurred. Please try again.";
+      return error.message || "Unexpected error occurred.";
     }
-    return "An unexpected error occurred. Please try again.";
+    return "Unexpected error occurred.";
   };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -74,13 +73,12 @@ export default function AuthPage() {
       setIsLoading(true);
       await signIn("password", { flow: "signIn", email, password });
       toast.success("Logged in successfully!");
-      setIsLoading(false);
       router.push("/");
     } catch (err) {
       console.error(err);
-      setIsLoading(false);
-
       toast.error(getFriendlyErrorMessage(err));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -92,24 +90,39 @@ export default function AuthPage() {
 
     try {
       setIsLoading(true);
-
       await signIn("password", { flow: "signUp", email, password, name });
-      setIsLoading(false);
-
       toast.success("Account created successfully!");
       router.push(`/?name=${encodeURIComponent(name)}&newUser=true`);
     } catch (err) {
       console.error(err);
-      setIsLoading(false);
-
       toast.error(getFriendlyErrorMessage(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 💫 Magic Link (Resend) handler
+  const handleMagicLink = async () => {
+    if (!validateEmail(email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
+    try {
+      setIsSendingLink(true);
+      await signIn("resend", { email, redirectTo: "/" });
+      toast.success("Check your inbox! We've sent you a magic sign-in link.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to send magic link. Please try again.");
+    } finally {
+      setIsSendingLink(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-background dark:bg-[#0a0a0a] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home Button */}
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
@@ -144,50 +157,43 @@ export default function AuthPage() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Sign In Form */}
+              {/* --- Sign In Form --- */}
               <TabsContent value="signin" className="space-y-4 mt-6">
                 <form onSubmit={handleSignIn} className="space-y-4">
+                  {/* Email */}
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email" className="text-foreground">
-                      Email
-                    </Label>
+                    <Label htmlFor="signin-email">Email</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         id="signin-email"
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)} //
+                        onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your email"
-                        className="pl-10 dark:bg-[#2a2a2a] dark:dark:border-gray-700 text-foreground dark:dark:placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 dark:bg-[#2a2a2a]"
                         required
                       />
                     </div>
-                    <p className="text-foreground text-sm">
-                      Admin email: admin@gmail.com
-                    </p>
+                    <p>Admin email: admin@gmail.com</p>
                   </div>
 
+                  {/* Password */}
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="signin-password"
-                      className="text-foreground"
-                    >
-                      Password
-                    </Label>
+                    <Label htmlFor="signin-password">Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         id="signin-password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
-                        className="pl-10 pr-10 dark:bg-[#2a2a2a] dark:dark:border-gray-700 text-foreground dark:dark:placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 pr-10 dark:bg-[#2a2a2a]"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
                       >
                         {showPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -196,35 +202,17 @@ export default function AuthPage() {
                         )}
                       </button>
                     </div>
-                    <p className="text-foreground text-sm">
-                      Admin password: admin@123
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      <input
-                        type="checkbox"
-                        className="rounded border-border bg-secondary"
-                      />
-                      <span>Remember me</span>
-                    </label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm text-blue-500 hover:text-blue-400"
-                    >
-                      Forgot password?
-                    </Link>
+                    <p>Admin password: admin@123</p>
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="size-4 shrink-0 text-white animate-spin" />
+                        <Loader2 className="size-4 animate-spin mr-2" />
                         Signing in...
                       </>
                     ) : (
@@ -233,12 +221,36 @@ export default function AuthPage() {
                   </Button>
                 </form>
 
+                {/* Magic Link login */}
+                <div className="space-y-2 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full flex items-center justify-center border-border"
+                    onClick={handleMagicLink}
+                    disabled={isSendingLink}
+                  >
+                    {isSendingLink ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        Sending magic link...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4 mr-2" />
+                        Send magic sign-in link
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Divider */}
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t dark:border-gray-700" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card dark:bg-[#1a1a1a] px-2 text-muted-foreground">
+                    <span className="bg-card px-2 text-muted-foreground">
                       Or continue with
                     </span>
                   </div>
@@ -253,36 +265,32 @@ export default function AuthPage() {
                     src="/google.png"
                     width={20}
                     height={20}
-                    className="size-4 mr-2 shrink-0"
+                    className="size-4 mr-2"
                     alt="google icon"
                   />
                   Google
                 </Button>
               </TabsContent>
 
-              {/* Sign Up Form */}
+              {/* --- Sign Up Form --- */}
               <TabsContent value="signup" className="space-y-4 mt-6">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name" className="text-foreground">
-                      Full Name
-                    </Label>
+                    <Label htmlFor="signup-name">Full Name</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         id="signup-name"
                         type="text"
                         placeholder="Enter your full name"
-                        className="pl-10 dark:bg-[#2a2a2a] dark:dark:border-gray-700 text-foreground dark:placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 dark:bg-[#2a2a2a]"
                         required
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-foreground">
-                      Email
-                    </Label>
+                    <Label htmlFor="signup-email">Email</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
@@ -291,32 +299,27 @@ export default function AuthPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your email"
-                        className="pl-10 dark:bg-[#2a2a2a] dark:border-gray-700 text-foreground dark:placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 dark:bg-[#2a2a2a]"
                         required
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="signup-password"
-                      className="text-foreground"
-                    >
-                      Password
-                    </Label>
+                    <Label htmlFor="signup-password">Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
                         id="signup-password"
                         type={showPassword ? "text" : "password"}
                         placeholder="Create a password"
-                        className="pl-10 pr-10 dark:bg-[#2a2a2a] dark:border-gray-700 text-foreground dark:placeholder:text-gray-500 focus:border-blue-500"
+                        className="pl-10 pr-10 dark:bg-[#2a2a2a]"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
                       >
                         {showPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -327,74 +330,14 @@ export default function AuthPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="signup-confirm-password"
-                      className="text-foreground"
-                    >
-                      Confirm Password
-                    </Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input
-                        id="signup-confirm-password"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm your password"
-                        className="pl-10 pr-10 dark:bg-[#2a2a2a] dark:border-gray-700 text-foreground dark:placeholder:text-gray-500 focus:border-blue-500"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        {showConfirmPassword ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="terms"
-                      className="rounded dark:border-gray-700 dark:bg-[#2a2a2a]"
-                      required
-                    />
-                    <label
-                      htmlFor="terms"
-                      className="text-sm text-muted-foreground"
-                    >
-                      I agree to the{" "}
-                      <Link
-                        href="/terms"
-                        className="text-blue-500 hover:text-blue-400"
-                      >
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link
-                        href="/privacy"
-                        className="text-blue-500 hover:text-blue-400"
-                      >
-                        Privacy Policy
-                      </Link>
-                    </label>
-                  </div>
-
                   <Button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="size-4 shrink-0 text-white animate-spin" />
+                        <Loader2 className="size-4 animate-spin mr-2" />
                         Creating account...
                       </>
                     ) : (
@@ -402,6 +345,29 @@ export default function AuthPage() {
                     )}
                   </Button>
                 </form>
+
+                {/* Magic Link signup */}
+                <div className="space-y-2 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full flex items-center justify-center border-border"
+                    onClick={handleMagicLink}
+                    disabled={isSendingLink}
+                  >
+                    {isSendingLink ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        Sending magic link...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4 mr-2" />
+                        Sign up via email link
+                      </>
+                    )}
+                  </Button>
+                </div>
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -415,15 +381,15 @@ export default function AuthPage() {
                 </div>
 
                 <Button
+                  onClick={() => void signIn("google")}
                   variant="outline"
                   className="border-border w-full bg-secondary text-foreground hover:bg-accent"
-                  onClick={() => void signIn("google")}
                 >
                   <Image
                     src="/google.png"
                     width={20}
                     height={20}
-                    className="size-4 mr-2 shrink-0"
+                    className="size-4 mr-2"
                     alt="google icon"
                   />
                   Google

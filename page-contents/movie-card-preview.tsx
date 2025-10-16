@@ -1,10 +1,13 @@
 "use client";
 
+import { useQueryWithStatus } from "@/components/ConvexClientProvider";
 import { Card, CardContent } from "@/components/ui/card";
+import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
 import { useReview } from "@/hooks/use-review";
 import { Star } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 type Ratings = {
@@ -36,6 +39,11 @@ const MovieCardPreview = ({
     existingRating,
     hasRatings,
   } = useReview(featuredMovie._id);
+  const router = useRouter();
+
+  const { data: isAuthenticated, isPending } = useQueryWithStatus(
+    api.auth.isAuthenticated,
+  );
 
   const handleStarClick = (category: keyof Ratings, star: number) => {
     handleRatingChange(category, star);
@@ -67,38 +75,37 @@ const MovieCardPreview = ({
 
           {/* Rating Categories */}
           <div className="space-y-2">
-            {categories.map((cat) => (
-              <div key={cat} className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground capitalize">
-                  {cat}
-                </span>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => handleStarClick(cat, star)}
-                      disabled={isSubmitting}
-                      className="focus:outline-none"
-                    >
+            <div className="space-y-2">
+              {[
+                "Acting",
+                "Plot",
+                "Cinematography",
+                "Direction",
+                "Entertainment",
+              ].map((cat, idx) => (
+                <div key={cat} className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{cat}</span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
                       <Star
-                        className={`h-4 w-4 transition-colors ${
-                          star <= (ratings?.[cat] || 0)
+                        key={star}
+                        className={`h-4 w-4 ${
+                          star <= 4 + idx * 0.2
                             ? "fill-amber-400 text-amber-400"
                             : "text-muted"
                         }`}
                       />
-                    </button>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           {/* Submit or Update Button */}
-          <button
+          {/* <button
             onClick={handleSubmit}
-            disabled={isSubmitting || !hasRatings}
+            disabled={isSubmitting || !hasRatings || isPending}
             className={`mt-6 w-full rounded-lg px-4 py-2 text-sm font-medium text-white transition 
               ${
                 hasRatings
@@ -111,7 +118,7 @@ const MovieCardPreview = ({
               : existingRating
                 ? "Update Rating"
                 : "Submit Rating"}
-          </button>
+          </button> */}
         </CardContent>
       </Card>
     </div>

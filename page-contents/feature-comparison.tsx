@@ -82,7 +82,7 @@ const FeatureComparison = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="p-4 text-center">
+                  <td className="p-4 text-center flex items-center justify-center">
                     <X className="h-5 w-5 text-red-500" />
                   </td>
                 </tr>
@@ -150,10 +150,10 @@ const FeatureComparison = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="p-4 text-center">
+                  <td className="p-4 text-center flex items-center justify-center">
                     <Check className="h-5 w-5 text-green-500" />
                   </td>
-                  <td className="p-4 text-center">
+                  <td className="p-4 text-center flex items-center justify-center">
                     <Check className="h-5 w-5 text-green-500" />
                   </td>
                 </tr>

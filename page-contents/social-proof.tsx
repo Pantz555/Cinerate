@@ -44,6 +44,7 @@ const SocialProof = () => {
 
     return () => clearInterval(timer);
   }, []);
+
   return (
     <section className="px-4 py-20">
       <div className="mx-auto max-w-7xl">

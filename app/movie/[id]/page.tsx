@@ -552,7 +552,7 @@ export default function MovieDetailsPage({
                 {categoryRatings.map((item) => (
                   <div
                     key={item.category}
-                    className="flex items-center justify-between p-4 bg-background rounded-lg border border-border"
+                    className="flex flex-wrap gap-2 items-center justify-between p-4 bg-background rounded-lg border border-border"
                   >
                     <span className="text-foreground font-medium">
                       {item.category}
