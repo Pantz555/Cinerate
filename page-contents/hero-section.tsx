@@ -1,93 +1,227 @@
 "use client";
 
-import { useQueryWithStatus } from "@/components/ConvexClientProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/convex/_generated/api";
 import { ArrowRight, Play, Sparkles, Star } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import MovieCardPreview from "./movie-card-preview";
 
 const HeroSection = () => {
-  const { data: isAuthenticated, isPending } = useQueryWithStatus(
-    api.auth.isAuthenticated,
-  );
-
-  const { data, isPending: featuredLoading } = useQueryWithStatus(
-    api.movies.getMoviesWithFilters,
-    {
-      featured: true,
-      sortBy: "highest",
-    },
-  );
-
-  const featuredMovie = data ? data[0] : null;
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-20">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(59,130,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_120%,rgba(59,130,246,0.05),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      {/* Blue Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#4F46E5] to-[#3B82F6]" />
 
-      <div className="relative z-10 mx-auto max-w-7xl text-center">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+      {/* Animated Particles */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute h-1 w-1 rounded-full bg-white/30 animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 25}s`,
+              animationDuration: `${20 + Math.random() * 10}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Floating Movie Poster Cards */}
+      <div className="absolute inset-0 hidden lg:block">
+        {/* Avengers Endgame - Top Left */}
+        <div
+          className="absolute left-[10%] top-[15%] w-[200px] animate-float-slow"
+          style={{ transform: "rotate(-15deg)" }}
+        >
+          <Card className="overflow-hidden bg-white/90 backdrop-blur-sm transition-transform hover:scale-105 hover:rotate-[-10deg] duration-300">
+            <CardContent className="p-3">
+              <div
+                className="mb-2 aspect-[2/3] rounded "
+                style={{
+                  backgroundImage: `url("/avenger.png")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
+              <h4 className="text-sm font-semibold text-gray-900">
+                Avengers: Endgame
+              </h4>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className="h-3 w-3 fill-amber-400 text-amber-400"
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Inception - Top Right */}
+        <div
+          className="absolute right-[10%] top-[20%] w-[200px] animate-float-slow"
+          style={{ transform: "rotate(10deg)", animationDelay: "2s" }}
+        >
+          <Card className="overflow-hidden bg-white/90 backdrop-blur-sm transition-transform hover:scale-105 hover:rotate-[15deg] duration-300">
+            <CardContent className="p-3">
+              <div
+                className="mb-2 aspect-[2/3] rounded "
+                style={{
+                  backgroundImage: `url("/inception.png")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
+              <h4 className="text-sm font-semibold text-gray-900">Inception</h4>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className="h-3 w-3 fill-amber-400 text-amber-400"
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Parasite - Bottom Left */}
+        <div
+          className="absolute bottom-[15%] left-[15%] w-[200px] animate-float-slow"
+          style={{ transform: "rotate(-8deg)", animationDelay: "4s" }}
+        >
+          <Card className="overflow-hidden bg-white/90 backdrop-blur-sm transition-transform hover:scale-105 hover:rotate-[-3deg] duration-300">
+            <CardContent className="p-3">
+              <div
+                className="mb-2 aspect-[2/3] rounded "
+                style={{
+                  backgroundImage: `url("/parasite.png")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
+              <h4 className="text-sm font-semibold text-gray-900">Parasite</h4>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className="h-3 w-3 fill-amber-400 text-amber-400"
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Dune - Bottom Right */}
+        <div
+          className="absolute bottom-[20%] right-[12%] w-[200px] animate-float-slow"
+          style={{ transform: "rotate(12deg)", animationDelay: "6s" }}
+        >
+          <Card className="overflow-hidden bg-white/90 backdrop-blur-sm transition-transform hover:scale-105 hover:rotate-[17deg] duration-300">
+            <CardContent className="p-3">
+              <div
+                className="mb-2 aspect-[2/3] rounded "
+                style={{
+                  backgroundImage: `url("/dune.png")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
+              <h4 className="text-sm font-semibold text-gray-900">Dune</h4>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className="h-3 w-3 fill-amber-400 text-amber-400"
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Mobile Floating Cards (only 2) */}
+      <div className="absolute inset-0 lg:hidden">
+        {/* Avengers - Top Left */}
+        <div
+          className="absolute left-[5%] top-[10%] w-[120px] animate-float-slow transition-all duration-300"
+          style={{
+            transform: "rotate(-10deg)",
+          }}
+        >
+          <Card className="overflow-hidden bg-white/90 backdrop-blur-sm">
+            <CardContent className="p-2">
+              <div
+                className="mb-1 aspect-[2/3] "
+                style={{
+                  backgroundImage: `url("/avenger.png")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
+              <h4 className="text-xs font-semibold text-gray-900">Avengers</h4>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Dune - Bottom Right */}
+        <div
+          className="absolute bottom-[15%] right-[5%] w-[120px] animate-float-slow transition-all duration-300"
+          style={{
+            transform: "rotate(8deg)",
+            animationDelay: "3s",
+          }}
+        >
+          <Card className="overflow-hidden bg-white/90 backdrop-blur-sm">
+            <CardContent className="p-2">
+              <div
+                className="mb-1 aspect-[2/3] "
+                style={{
+                  backgroundImage: `url("/dune.png")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
+              <h4 className="text-xs font-semibold text-gray-900">Dune</h4>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Central Content */}
+      <div className="relative z-10 mx-auto max-w-4xl text-center">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
           <Sparkles className="h-4 w-4" />
           Join 10,000+ movie lovers
         </div>
 
-        <h1 className="text-3xl leading-[1.29167] font-bold text-balance sm:text-4xl lg:text-6xl mb-10">
-          Rate Movies the Way
-          <br />
-          <span className="relative">
-            Effortless
-            <svg
-              width="223"
-              height="12"
-              viewBox="0 0 223 12"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute inset-x-0 bottom-0 w-full translate-y-1/2 max-sm:hidden"
-            >
-              <path
-                d="M1.11716 10.428C39.7835 4.97282 75.9074 2.70494 114.894 1.98894C143.706 1.45983 175.684 0.313587 204.212 3.31596C209.925 3.60546 215.144 4.59884 221.535 5.74551"
-                stroke="url(#paint0_linear_10365_68643)"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <defs>
-                <linearGradient
-                  id="paint0_linear_10365_68643"
-                  x1="18.8541"
-                  y1="3.72033"
-                  x2="42.6487"
-                  y2="66.6308"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop stopColor="var(--primary)" />
-                  <stop offset="1" stopColor="var(--primary-foreground)" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </span>{" "}
-          They Deserve
+        <h1 className="mb-6 font-sans text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+          Rate Movies the Way They Deserve
         </h1>
-        {/* <h1 className="mb-6 text-5xl font-bold leading-tight text-foreground sm:text-6xl lg:text-7xl">
-          Rate Movies the Way
-          <br />
-          <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            They Deserve
-          </span>
-        </h1> */}
 
-        <p className="mx-auto mb-12 max-w-2xl text-lg text-muted-foreground sm:text-xl">
+        <p className="mx-auto mb-12 max-w-2xl font-sans text-lg text-white/90 sm:text-xl">
           Go beyond single stars. Rate acting, plot, cinematography, direction,
           and entertainment—all in one place.
         </p>
 
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button size="lg" className="h-14 px-8 text-lg text-white" asChild>
-            <Link href={isAuthenticated ? "/discover" : "/auth"}>
+          <Button
+            size="lg"
+            className="h-14 bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] px-8 text-lg font-semibold text-white shadow-lg transition-transform hover:scale-105 hover:shadow-xl"
+            asChild
+          >
+            <Link href="/auth">
               Start Rating for Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
@@ -95,7 +229,7 @@ const HeroSection = () => {
           <Button
             size="lg"
             variant="outline"
-            className="h-14 px-8 text-lg bg-transparent"
+            className="h-14 border-2 border-white dark:border-white dark:hover:border-white bg-transparent px-8 text-lg font-medium text-white backdrop-blur-sm transition-all hover:bg-white hover:text-[#3B82F6] dark:hover:bg-white"
             asChild
           >
             <Link href="#how-it-works">
@@ -104,53 +238,9 @@ const HeroSection = () => {
             </Link>
           </Button>
         </div>
-
-        {/* Animated Movie Card Preview */}
-        {featuredLoading ? (
-          <MovieRatingCardSkeleton />
-        ) : featuredMovie ? (
-          <MovieCardPreview featuredMovie={featuredMovie} />
-        ) : (
-          <p className="text-center">No movie found at this moment.</p>
-        )}
       </div>
     </section>
   );
 };
 
 export default HeroSection;
-
-const MovieRatingCardSkeleton = () => {
-  return (
-    <div className="mt-16">
-      <Card className="mx-auto max-w-md border-2 shadow-2xl">
-        <CardContent className="p-6 animate-pulse">
-          <div className="mb-4 flex items-center gap-3">
-            {/* Movie Poster */}
-            <Skeleton className="h-16 w-12 rounded bg-muted" />
-
-            {/* Movie Info */}
-            <div className="space-y-2 flex-1">
-              <Skeleton className="h-4 w-32 bg-muted" />
-              <Skeleton className="h-3 w-20 bg-muted" />
-            </div>
-          </div>
-
-          {/* Rating categories */}
-          <div className="space-y-3 mt-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <Skeleton className="h-3 w-20 bg-muted" />
-                <div className="flex gap-1">
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <Skeleton key={j} className="h-4 w-4 rounded-sm bg-muted" />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};

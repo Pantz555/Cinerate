@@ -35,7 +35,7 @@ const HeaderActions = () => {
         </>
       ) : (
         <Link className="text-primary hover:underline" href="/auth">
-          Signin
+          Sign In
         </Link>
       )}
     </div>
