@@ -9,7 +9,7 @@ import { useQuery } from "convex-helpers/react/cache";
 import { Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useState } from "react";
 
 const PreFooterCta = () => {
   const { signIn } = useAuthActions();
@@ -67,9 +67,8 @@ const PreFooterCta = () => {
 
                 <div className="mb-6">
                   <Button
-                    
                     onClick={() => void signIn("google")}
-                      variant="outline"
+                    variant="outline"
                     size="lg"
                     className="mb-6 h-12 w-full max-w-md border border-[#E5E7EB] bg-white text-gray-700 dark:text-white hover:bg-gray-50"
                   >

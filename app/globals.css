@@ -202,3 +202,7 @@
 .animate-float-slow {
   animation: float-slow 3s ease-in-out infinite;
 }
+
+button {
+  cursor: pointer !important;
+}

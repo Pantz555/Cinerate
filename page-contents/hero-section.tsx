@@ -1,12 +1,15 @@
 "use client";
 
+import { useQueryWithStatus } from "@/components/ConvexClientProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { api } from "@/convex/_generated/api";
 import { ArrowRight, Play, Sparkles, Star } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
 const HeroSection = () => {
+  const { data: user } = useQueryWithStatus(api.auth.loggedInUser);
+  console.log("user from hero section", user);
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-20">
       {/* Blue Gradient Background */}
@@ -221,7 +224,7 @@ const HeroSection = () => {
             className="h-14 bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] px-8 text-lg font-semibold text-white shadow-lg transition-transform hover:scale-105 hover:shadow-xl"
             asChild
           >
-            <Link href="/auth">
+            <Link href={user && user?._id ? "/discover" : "/auth"}>
               Start Rating for Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
